@@ -1,0 +1,7 @@
+
+install instructions:
+
+in this directory:
+
+docker build -t gemoto .
+docker run gemoto
