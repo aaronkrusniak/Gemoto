@@ -1,0 +1,11 @@
+
+install instructions:
+
+in this directory:
+
+docker build -t gemoto .
+docker run -p 5000:5000 gemoto
+
+then:
+
+curl localhost:5000/index?q=twitter_search_term

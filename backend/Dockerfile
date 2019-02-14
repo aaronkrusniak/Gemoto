@@ -1,0 +1,12 @@
+FROM debian
+RUN apt-get update && apt-get install -y rubygems python python-pip python-dev
+RUN gem i twurl --source http://rubygems.org
+
+COPY requirements.txt /app/requirements.txt
+WORKDIR /app
+RUN pip install -r requirements.txt
+COPY twurlrc /root/.twurlrc
+COPY app.py /app
+COPY scrape.bash /app
+EXPOSE 5000
+CMD ["/app/app.py"]
