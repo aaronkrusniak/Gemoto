@@ -7,6 +7,5 @@ WORKDIR /app
 RUN pip install -r requirements.txt
 COPY twurlrc /root/.twurlrc
 COPY app.py /app
-COPY scrape.bash /app
 EXPOSE 5000
 CMD ["/app/app.py"]
