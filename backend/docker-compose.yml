@@ -1,0 +1,30 @@
+version: '3'
+services:
+  twitter:
+    build: twitter
+    expose:
+     - "5000"
+    volumes:
+     - ./twitter:/app
+  watson:
+    build: watson
+    expose:
+     - "5000"
+    volumes:
+     - ./watson:/app
+  filter:
+    build: filter
+    expose:
+     - "5000"
+    volumes:
+     - ./filter:/app
+  server:
+    build: server
+    ports:
+     - "80:5000"
+    volumes:
+     - ./server:/app
+    links:
+     - "watson"
+     - "twitter"
+     - "filter"

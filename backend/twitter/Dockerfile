@@ -6,6 +6,6 @@ COPY requirements.txt /app/requirements.txt
 WORKDIR /app
 RUN pip install -r requirements.txt
 COPY twurlrc /root/.twurlrc
-COPY app.py /app
+COPY twitter.py /app
 EXPOSE 5000
-CMD ["/app/app.py"]
+CMD ["python2", "/app/twitter.py"]
