@@ -1,20 +1,25 @@
 #!/usr/bin/env python3
-# Authors: Benjamin T James
+# Authors: Benjamin T James, Tom Wu
 from flask import Flask, request, jsonify
-import subprocess as sp
 import json
-import sys
-
+import re
 
 app = Flask(__name__)
 
-@app.route("/", methods=['POST'])
+
+def clean_tweet(tweet):
+    tweet = re.sub(r"https?://\S+", "", tweet).strip()
+    return tweet
+
+
+@app.route("/", methods=["POST"])
 def handle():
-        data = request.data
-        dataDict = json.loads(data)
-        status_list = dataDict["statuses"]
-        text_list = [tweet["text"] for tweet in status_list]
-        return jsonify(text_list)
+    data = request.data
+    dataDict = json.loads(data)
+    status_list = dataDict["statuses"]
+    text_list = [clean_tweet(tweet["text"]) for tweet in status_list]
+    return jsonify(text_list)
+
 
 if __name__ == "__main__":
-        app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host="0.0.0.0")
