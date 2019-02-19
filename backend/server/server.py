@@ -19,7 +19,7 @@ def get_filter(data):
         headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
         response = requests.post("http://filter:5000/", headers=headers, json=data)
         p_data = json.loads(response.text)
-        return jsonify(p_data)
+        return p_data
 
 def get_tweet(query):
         if query:
@@ -31,6 +31,12 @@ def get_tweet(query):
         response = requests.get("http://twitter:5000/" + query)
         return json.loads(response.text)
 
+def get_watson(data):
+        print("DEBUG_FILTER: " + str(len(data)), file=sys.stderr)
+        headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+        response = requests.post("http://watson:5000/", headers=headers, json=data)
+        p_data = json.loads(response.text)
+        return p_data
 
 def default():
         return "sample text"
@@ -48,9 +54,9 @@ def handle():
         if method == "twitter":
                 return jsonify(get_tweet(q))
         elif method == "filter":
-                return get_filter(get_tweet(q))
+                return jsonify(get_filter(get_tweet(q)))
         elif method == "watson":
-                return requests.get("http://watson:5000/").text
+                return jsonify(get_watson(get_filter(get_tweet(q))))
         else:
                 return default()
 

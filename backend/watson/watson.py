@@ -8,10 +8,13 @@ import sys
 
 app = Flask(__name__)
 
-@app.route("/")
-@app.route("/index")
+# incoming data should be an array
+@app.route("/", methods=['POST'])
 def handle():
-	return "my name is watson"
+        data = request.data
+        dataDict = json.loads(data)
+#        for tweet in dataDict:
+        return jsonify("my name is watson")
 
 if __name__ == "__main__":
         app.run(debug=True, host='0.0.0.0')
