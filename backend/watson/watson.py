@@ -8,7 +8,10 @@ import sys
 app = Flask(__name__)
 
 def process(tweet_text):
-        return "watson says: " + tweet_text
+
+        watsonReturn = {"document_tone":{"tones":[{"score":0.6165,"tone_id":"sadness","tone_name":"Sadness"},{"score":0.829888,"tone_id":"analytical","tone_name":"Analytical"}]}}
+
+        return watsonReturn
 
 # incoming data should be an array
 @app.route("/", methods=['POST'])
