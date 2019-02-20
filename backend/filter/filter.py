@@ -15,10 +15,18 @@ def clean_tweet(tweet):
 @app.route("/", methods=["POST"])
 def handle():
     data = request.data
-    dataDict = json.loads(data)
-    status_list = dataDict["statuses"]
-    text_list = [clean_tweet(tweet["text"]) for tweet in status_list]
-    return jsonify(text_list)
+    status_list = json.loads(data)
+    text_list = []
+    for tweet in status_list:
+        text_item = dict()
+        properties = dict()
+        # All user data is held in "properties"
+        properties["text"] = clean_tweet(tweet["text"])
+        text_item["properties"] = properties
+        text_item["type"] = "Feature"
+        text_item["geometry"] = tweet["coordinates"]
+        text_list.append(text_item)
+    return jsonify({"type": "FeatureCollection", "features": text_list})
 
 
 if __name__ == "__main__":

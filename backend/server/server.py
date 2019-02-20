@@ -8,31 +8,28 @@ import requests
 
 app = Flask(__name__)
 
-def get_watson(query):
-        response = requests.get("http://watson:5000/?q=" + query)
-        return json.loads(response.text)
-
-
 def get_filter(data):
         """POST request with tweet data (param) to filter"""
-        print("DEBUG_FILTER: " + str(len(data)), file=sys.stderr)
+        app.logger.info("filter: " + str(len(data)) + " items")
         headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
         response = requests.post("http://filter:5000/", headers=headers, json=data)
         p_data = json.loads(response.text)
         return p_data
 
-def get_tweet(query):
+def get_tweet(query, rpp=100):
         if query:
                 query = "?q=" + query
         else:
                 query = '?q=geocode:36.1523237,-95.94596152761295,1km'
-        #query = query + "&text=bottom"
-        print("DEBUG_SERVER_TWEET: \"%s\"" % query, file=sys.stderr)
+        if rpp:
+                query += '&rpp=' + str(rpp)
+        app.logger.info("tweet query: " + query)
         response = requests.get("http://twitter:5000/" + query)
+        app.logger.info(response)
         return json.loads(response.text)
 
 def get_watson(data):
-        print("DEBUG_FILTER: " + str(len(data)), file=sys.stderr)
+        app.logger.info("watson: " + str(len(data)) + " items")
         headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
         response = requests.post("http://watson:5000/", headers=headers, json=data)
         p_data = json.loads(response.text)
@@ -52,7 +49,7 @@ def handle():
         if 'q' in args.keys():
                 q = args['q']
         if method == "twitter":
-                return jsonify(get_tweet(q))
+                return jsonify(get_tweet(q, 10))
         elif method == "filter":
                 return jsonify(get_filter(get_tweet(q)))
         elif method == "watson":
