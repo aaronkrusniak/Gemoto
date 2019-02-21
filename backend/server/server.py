@@ -38,8 +38,18 @@ def get_watson(data):
 def default():
         return "sample text"
 
-@app.route("/")
-@app.route("/index")
+
+@app.route("/filter", methods=["POST"])
+def handle_post_filter():
+        data = json.loads(request.data)
+        return jsonify(get_filter(data))
+
+@app.route("/watson", methods=["POST"])
+def handle_post_watson():
+        data = json.loads(request.data)
+        return jsonify(get_watson(data))
+
+@app.route("/", methods=["GET"])
 def handle():
         args = request.args.to_dict()
         if 'm' not in args.keys():
