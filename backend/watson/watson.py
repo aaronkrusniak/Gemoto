@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-# Authors: Benjamin T James
+# Authors: Benjamin T James, Tom Wu
 from flask import Flask, request, jsonify
 import subprocess as sp
 import json
+import copy
 import sys
 from watson_developer_cloud import ToneAnalyzerV3
 
 app = Flask(__name__)
 
-tones = set(["Anger", "Fear", "Joy", "Sadness", "Analytical", "Confident", "Tentative"])
+tones = set(["anger", "fear", "joy", "sadness"])
 
 
 def process(tweet_text):
@@ -16,27 +17,36 @@ def process(tweet_text):
         tweet_text, content_type="text/plain", sentences=False
     )
     res = json_output.get_result()
-    tone_objs = [obj for obj in res["document_tone"]["tones"]]
-    tone = None
-    if tone_objs:
-        tone = max(tone_objs, key=lambda x: x["score"])
-    return tone
+    # Filter down various tone objects returned for given tweet
+    tone_objs = [
+        obj for obj in res["document_tone"]["tones"] if obj["tone_id"] in tones
+    ]
+    return tone_objs
 
 
 # incoming data should be an array
 @app.route("/", methods=["POST"])
 def handle():
+    args = request.args.to_dict()
+    # Only support one emotion
+    tone = ""
+    if len(args.keys()) == 1:
+        for k in args.keys():
+            tone = args[k]
     data = request.data
     dataDict = json.loads(data)
+    retDict = {"features": [], "type": "FeatureCollection"}
     for tweet in dataDict["features"]:
         in_text = tweet["properties"]["text"]
-        out_text = process(in_text)
-        if out_text:
-            tweet["properties"][out_text["tone_name"]] = out_text["score"]
-    dataDict["features"] = [
-        t for t in dataDict["features"] if set(t["properties"]) & tones
-    ]
-    return jsonify(dataDict)
+        tones = process(in_text)
+        for obj in tones:
+            if tone == obj["tone_id"]:
+                # Create a copy of the tweet for each tone analyzed
+                newTweet = copy.deepcopy(tweet)
+                newTweet["properties"][obj["tone_id"]] = obj["score"]
+                retDict["features"].append(newTweet)
+
+    return jsonify(retDict)
 
 
 if __name__ == "__main__":

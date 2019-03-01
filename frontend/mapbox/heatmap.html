@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Display a map</title>
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js"></script>
+    <link
+      href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      mapboxgl.accessToken =
+        "pk.eyJ1IjoidG9tbGVld3UiLCJhIjoiY2pzZHo3eXZxMTE2NzQ2b2E4Y3BycHNjZyJ9.7QT62BItg33RniE2SMuBDg";
+      const map = new mapboxgl.Map({
+        container: "map",
+        //style: "mapbox://styles/tomleewu/cjsdzzt720e1y1fpn9aln8k4m",
+        style: "mapbox://styles/mapbox/dark-v9",
+        center: [-95.942434, 36.148201],
+        zoom: 14.8
+      });
+
+      function addEmoLayer(srcName, emo) {
+        if (emo == "joy") {
+          map.addLayer({
+            id: emo + "-point-map",
+            type: "circle",
+            source: srcName,
+            minzoom: 14,
+            paint: {
+              "circle-color": {
+                property: "joy",
+                type: "exponential",
+                stops: [
+                  [0.5, "rgb(254,240,217)"],
+                  [0.6, "rgb(253,204,138)"],
+                  [0.7, "rgb(252,141,89)"],
+                  [0.8, "rgb(227,74,51)"],
+                  [0.9, "rgb(179,0,0)"]
+                ]
+              },
+              "circle-stroke-color": "white",
+              "circle-stroke-width": 1,
+              "circle-radius": {
+                property: "joy",
+                type: "exponential",
+                stops: [
+                  [{ zoom: 15, value: 0.5 }, 5],
+                  [{ zoom: 15, value: 1 }, 10],
+                  [{ zoom: 22, value: 0.5 }, 20],
+                  [{ zoom: 22, value: 1 }, 50]
+                ]
+              },
+              "circle-opacity": {
+                stops: [[14, 0], [15, 0.7]]
+              }
+            }
+          });
+          map.addLayer({
+            id: emo + "-map",
+            type: "heatmap",
+            source: srcName,
+            maxzoom: 15,
+            paint: {
+              "heatmap-radius": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                0,
+                5,
+                22,
+                30
+              ],
+              "heatmap-weight": {
+                property: "joy",
+                type: "exponential",
+                stops: [[0.5, 0], [1, 1]]
+              },
+              "heatmap-color": [
+                "interpolate",
+                ["linear"],
+                ["heatmap-density"],
+                0,
+                "rgba(0, 0, 255, 0)",
+                0.1,
+                "#ffffd4",
+                0.3,
+                "#fed98e",
+                0.5,
+                "#fe9929",
+                0.7,
+                "#d95f0e",
+                1,
+                "#993404"
+              ],
+              "heatmap-opacity": {
+                default: 1,
+                stops: [[14, 1], [15, 0]]
+              },
+              "heatmap-intensity": {
+                stops: [[11, 1], [15, 3]]
+              }
+            }
+          });
+        }
+      }
+
+      map.on("load", function() {
+        emotions = ["joy", "fear", "anger", "sadness"];
+        map.addSource(emotions[0], {
+          type: "geojson",
+          data: "http://localhost/?m=watson&t=" + emotions[0]
+        });
+        addEmoLayer("joy", "joy");
+      });
+
+      map.on("click", function(e) {
+        var features = map.queryRenderedFeatures(e.point, {
+          layers: ["joy-point-map"]
+        });
+
+        if (!features.length) {
+          return;
+        }
+        var feature = features[0];
+        var popup = new mapboxgl.Popup({ offset: [0, -15] })
+          .setLngLat(feature.geometry.coordinates)
+          .setHTML(
+            "<h5>" +
+              feature.properties.text +
+              "</h5><p>" +
+              feature.properties.joy +
+              "<p>"
+          )
+          .setLngLat(feature.geometry.coordinates)
+          .addTo(map);
+      });
+    </script>
+  </body>
+</html>
