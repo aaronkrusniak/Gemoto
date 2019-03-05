@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Gemoto | See how the world is feeling</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins">
+    <style>
+        body,h1,h2,h3,h4,h5 {font-family: "Poppins", sans-serif}
+        body {font-size:16px;}
+        .w3-half img{margin-bottom:-6px;margin-top:16px;opacity:0.8;cursor:pointer}
+        .w3-half img:hover{opacity:1}
+    </style>
+</head>
+
+<body>
+<!-- Sidebar/menu -->
+<nav class="w3-sidebar w3-black w3-collapse w3-top w3-large w3-padding" style="z-index:3;width:340px;font-weight:bold;" id="mySidebar"><br>
+  <a href="javascript:void(0)" onclick="w3_close()" class="w3-button w3-hide-large w3-display-topleft" style="width:100%;font-size:22px">Close Menu</a>
+  <div class="w3-container">
+    <h1 class="w3-jumbo"><b>Gemoto</b></h1>
+    <h3 class="w3-padding-small"><br>See how the world is feeling.<br><br></b></h3>
+  </div>
+  <div class="w3-bar-block">
+    <a href="#explore" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Explore</a>
+    <a href="#help" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Help</a>
+    <a href="#about" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">About</a>
+    <a href="#methodology" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Methodology</a>
+    <!--<a href="#contact" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Contact</a>-->
+  </div>
+</nav>
+
+<!-- Top menu on small screens -->
+<header class="w3-container w3-top w3-hide-large w3-red w3-xlarge w3-padding">
+  <a href="javascript:void(0)" class="w3-button w3-red w3-margin-right" onclick="w3_open()">☰</a>
+  <span>Gemoto: See how the world is feeling.</span>
+</header>
+
+<!-- Overlay effect when opening sidebar on small screens -->
+<div class="w3-overlay w3-hide-large" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+
+<!-- !PAGE CONTENT! -->
+<div class="w3-main w3-dark-gray" style="margin-left:340px;margin-right:0px">
+
+  <!-- Header -->
+  <div class="w3-hide-large" style="margin-top:60px" ></div>
+  <div class="w3-container" style="margin-top:0px" id="explore">
+    <h1 class="w3-xxxlarge w3-text-red" style="margin-top:10px"><b>Explore</b></h1>
+    <hr style="width:50px;border:5px solid red" class="w3-round">
+  </div>
+    
+  <!-- Options -->
+  <div class="w3-row-padding">
+    <!-- Checkboxes: select emotions to filter with -->
+    <div class="w3-check" style="margin-left:20px; margin-bottom:20px; width:80%">  
+        <input type="checkbox" checked="checked"> Happiness &nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="checkbox"> Anger &nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="checkbox"> Sadness &nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="checkbox"> Anxiety &nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="checkbox"> Confusion &nbsp;&nbsp;&nbsp;&nbsp;
+    </div>
+    
+    <!-- Map -->
+    <iframe class="frame" src="heatmap.html" height="450" width="800" align="center" style="display:block; margin:auto">
+    </iframe>
+  </div>
+
+  <!-- Help -->
+  <div class="w3-container" id="help" style="margin-top:30px">
+    <h1 class="w3-xxxlarge w3-text-red"><b>Help</b></h1>
+    <hr style="width:50px;border:5px solid red" class="w3-round">
+    <p>Gemoto is a data science tool that's designed to let you see how emotions vary geographically.</p>
+    <p>To get started, select an emotion to view on the map (or select several to overlay together).  You can pan around to explore different locations, or use the search bar to jump to a specific address.  Try seeing how people are feeling around your own home!
+    </p>
+  </div>
+
+  <!-- About -->
+  <div class="w3-container" id="about" style="margin-top:30px">
+    <h1 class="w3-xxxlarge w3-text-red"><b>About</b></h1>
+    <hr style="width:50px;border:5px solid red" class="w3-round">
+    <p>This tool was created as a senior capstone project for a group of computer science majors at the University of Tulsa.
+    </p>
+  </div>
+
+  <!-- The Team -->
+  <!--
+  <div class="w3-row-padding w3-grayscale">
+    <div class="w3-col m4 w3-margin-bottom">
+      <div class="w3-light-grey">
+        <img src="/w3images/team2.jpg" alt="John" style="width:100%">
+        <div class="w3-container">
+          <h3>John Doe</h3>
+          <p class="w3-opacity">CEO & Founder</p>
+          <p>Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.</p>
+        </div>
+      </div>
+    </div>
+    <div class="w3-col m4 w3-margin-bottom">
+      <div class="w3-light-grey">
+        <img src="/w3images/team1.jpg" alt="Jane" style="width:100%">
+        <div class="w3-container">
+          <h3>Jane Doe</h3>
+          <p class="w3-opacity">Designer</p>
+          <p>Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.</p>
+        </div>
+      </div>
+    </div>
+    <div class="w3-col m4 w3-margin-bottom">
+      <div class="w3-light-grey">
+        <img src="/w3images/team3.jpg" alt="Mike" style="width:100%">
+        <div class="w3-container">
+          <h3>Mike Ross</h3>
+          <p class="w3-opacity">Architect</p>
+          <p>Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.</p>
+        </div>
+      </div>
+    </div>
+  </div> -->
+
+  <!-- Methodology -->
+  <div class="w3-container" id="methodology" style="margin-top:30px">
+    <h1 class="w3-xxxlarge w3-text-red"><b>Methodology</b></h1>
+    <hr style="width:50px;border:5px solid red" class="w3-round">
+    <p>Gemoto runs by polling Twitter for recent geo-tagged tweets and sending them to IBM's Watson Tone Analyzer API.  Watson analyzes each tweet and looks for a range of emotions, like joy, anger, sadness, and fear.  If Watson is confident that a tweet conveys a particular emotion, it will flag the tweet as such.
+    <br><br>
+    Once all the tweets have been analyzed, the data is packaged and displayed here using Mapbox, a geographic visualization tool which powers services like Foursquare, Lonely Planet, Facebook, the Financial Times, The Weather Channel, and Snapchat.  You can use the selectors here to manipulate which emotions are overlayed on the map and pan around to see different areas.
+    <br><br>
+    Currently, only data for the nearby Oklahoma area where Gemoto was developed is available.  In the future, data will be updated periodically to adjust as emotions change over time, and will be collected from more parts of the world.</p>
+  </div>
+
+  <!-- Contact 
+  <div class="w3-container" id="contact" style="margin-top:30px">
+    <h1 class="w3-xxxlarge w3-text-red"><b>Contact.</b></h1>
+    <hr style="width:50px;border:5px solid red" class="w3-round">
+    <p>Do you want us to style your home? Fill out the form and fill me in with the details :) We love meeting new people!</p>
+    <form action="/action_page.php" target="_blank">
+      <div class="w3-section">
+        <label>Name</label>
+        <input class="w3-input w3-border" type="text" name="Name" required>
+      </div>
+      <div class="w3-section">
+        <label>Email</label>
+        <input class="w3-input w3-border" type="text" name="Email" required>
+      </div>
+      <div class="w3-section">
+        <label>Message</label>
+        <input class="w3-input w3-border" type="text" name="Message" required>
+      </div>
+      <button type="submit" class="w3-button w3-block w3-padding-large w3-red w3-margin-bottom">Send Message</button>
+    </form>
+  </div> -->
+  
+  <!-- W3.CSS Container -->
+  <div class="w3-container w3-padding-32" style="margin-top:30px;padding-right:58px"><p class="w3-right">Powered by <a href="https://www.w3schools.com/w3css/default.asp" title="W3.CSS" target="_blank" class="w3-hover-opacity">w3.css</a></p></div>
+
+<!-- End page content -->
+</div>
+
+<script>
+// Script to open and close sidebar
+function w3_open() {
+  document.getElementById("mySidebar").style.display = "block";
+  document.getElementById("myOverlay").style.display = "block";
+}
+
+function w3_close() {
+  document.getElementById("mySidebar").style.display = "none";
+  document.getElementById("myOverlay").style.display = "none";
+}
+
+</script>
+</body>
+
+</html>

@@ -37,13 +37,10 @@ http://localhost/?m=filter&q=search_term
 ```
 
 
-Access Watson:
+Access watson (currently does nothing useful):
 ```
-http://localhost/?m=watson&t=joy
+http://localhost/?m=watson
 ```
-Must provde one of the following tones:
-joy, sadness, anger, fear
-
 
 ### Notes
 
