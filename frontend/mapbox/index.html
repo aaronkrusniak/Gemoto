@@ -80,10 +80,10 @@
     <hr style="width:50px;border:5px solid red" class="w3-round">
     <p>This tool was created as a senior capstone project for a group of computer science majors at the University of Tulsa.
     </p>
-    <p><b>Meet us</b>:</p>
   </div>
 
   <!-- The Team -->
+  <!--
   <div class="w3-row-padding w3-grayscale">
     <div class="w3-col m4 w3-margin-bottom">
       <div class="w3-light-grey">
@@ -115,13 +115,17 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
 
   <!-- Methodology -->
   <div class="w3-container" id="methodology" style="margin-top:30px">
     <h1 class="w3-xxxlarge w3-text-red"><b>Methodology</b></h1>
     <hr style="width:50px;border:5px solid red" class="w3-round">
-    <p>Some text our prices. Lorem ipsum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure</p>
+    <p>Gemoto runs by polling Twitter for recent geo-tagged tweets and sending them to IBM's Watson Tone Analyzer API.  Watson analyzes each tweet and looks for a range of emotions, like joy, anger, sadness, and fear.  If Watson is confident that a tweet conveys a particular emotion, it will flag the tweet as such.
+    <br><br>
+    Once all the tweets have been analyzed, the data is packaged and displayed here using Mapbox, a geographic visualization tool which powers services like Foursquare, Lonely Planet, Facebook, the Financial Times, The Weather Channel, and Snapchat.  You can use the selectors here to manipulate which emotions are overlayed on the map and pan around to see different areas.
+    <br><br>
+    Currently, only data for the nearby Oklahoma area where Gemoto was developed is available.  In the future, data will be updated periodically to adjust as emotions change over time, and will be collected from more parts of the world.</p>
   </div>
 
   <!-- Contact 
