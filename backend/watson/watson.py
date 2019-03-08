@@ -9,7 +9,7 @@ from watson_developer_cloud import ToneAnalyzerV3
 
 app = Flask(__name__)
 
-tones = set(["anger", "fear", "joy", "sadness"])
+tone_list = set(["anger", "fear", "joy", "sadness"])
 
 
 def process(tweet_text):
@@ -17,35 +17,24 @@ def process(tweet_text):
         tweet_text, content_type="text/plain", sentences=False
     )
     res = json_output.get_result()
-    # Filter down various tone objects returned for given tweet
-    tone_objs = [
-        obj for obj in res["document_tone"]["tones"] if obj["tone_id"] in tones
-    ]
-    return tone_objs
+    return {obj['tone_id']: obj['score'] for obj in res['document_tone']['tones'] if obj['tone_id'] in tone_list}
 
 
 # incoming data should be an array
 @app.route("/", methods=["POST"])
 def handle():
     args = request.args.to_dict()
-    # Only support one emotion
-    tone = ""
-    if len(args.keys()) == 1:
-        for k in args.keys():
-            tone = args[k]
     data = request.data
     dataDict = json.loads(data)
     retDict = {"features": [], "type": "FeatureCollection"}
     for tweet in dataDict["features"]:
         in_text = tweet["properties"]["text"]
         tones = process(in_text)
-        for obj in tones:
-            if tone == obj["tone_id"]:
-                # Create a copy of the tweet for each tone analyzed
-                newTweet = copy.deepcopy(tweet)
-                newTweet["properties"][obj["tone_id"]] = obj["score"]
-                retDict["features"].append(newTweet)
-
+        for key in tone_list: # default values
+                tweet['properties'][key] = 0
+        for key, val in tones.items():
+                tweet['properties'][key] = val
+        retDict["features"].append(tweet)
     return jsonify(retDict)
 
 

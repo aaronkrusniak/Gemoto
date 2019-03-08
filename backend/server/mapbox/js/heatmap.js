@@ -140,7 +140,7 @@ map.on("load", function() {
   // HARDCODED FOR JOY CURRENTLY
   map.addSource(emotions[0], {
     type: "geojson",
-    data: "http://localhost/?m=watson&t=" + emotions[0]
+    data: "http://localhost/index?t=" + emotions[0]
   });
   addEmoLayer("joy", "joy");
 });

@@ -6,6 +6,22 @@ services:
      - "5000"
     volumes:
      - ./twitter:/app
+  db_iface:
+    build: db_iface
+    expose:
+     - "5000"
+    volumes:
+     - ./db_iface:/app
+    links:
+     - "db"
+    depends_on:
+     - "db"
+  db:
+    build: db
+    expose:
+     - "5432"
+    volumes:
+     - pgdata:/var/lib/postgresql/data
   watson:
     build: watson
     expose:
@@ -28,3 +44,6 @@ services:
      - "watson"
      - "twitter"
      - "filter"
+     - "db_iface"
+volumes:
+  pgdata:

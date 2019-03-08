@@ -3,9 +3,14 @@
 from flask import Flask, request, jsonify
 import json
 import re
+import time
 
 app = Flask(__name__)
 
+
+def tmreplace(in_time):
+    tm = time.strptime(in_time, '%a %b %d %H:%M:%S %z %Y')
+    return time.strftime('%Y-%m-%d', tm)
 
 def clean_tweet(tweet):
     tweet = re.sub(r"https?://\S+", "", tweet).strip()
@@ -29,13 +34,17 @@ def handle():
         properties = dict()
         # All user data is held in "properties"
         properties["text"] = clean_tweet(tweet["text"])
+        properties["name"] = tweet["user"]["screen_name"]
+        properties["id"] = tweet["id"]
+        properties["date"] = tmreplace(tweet["created_at"])
         text_item["properties"] = properties
         text_item["type"] = "Feature"
         text_item["geometry"] = tweet["coordinates"]
         if not text_item["geometry"] and tweet["place"]:
             coords = tweet['place']['bounding_box']['coordinates'][0]
             text_item["geometry"] = centroid_box(coords)
-        text_list.append(text_item)
+        if text_item["geometry"]:
+            text_list.append(text_item)
     return jsonify({"type": "FeatureCollection", "features": text_list})
 
 if __name__ == "__main__":
