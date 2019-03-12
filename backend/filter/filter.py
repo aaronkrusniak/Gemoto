@@ -33,7 +33,7 @@ def handle():
         text_item = dict()
         properties = dict()
         # All user data is held in "properties"
-        properties["text"] = clean_tweet(tweet["text"])
+        properties["text"] = clean_tweet(tweet["full_text"])
         properties["name"] = tweet["user"]["screen_name"]
         properties["id"] = tweet["id"]
         properties["date"] = tmreplace(tweet["created_at"])

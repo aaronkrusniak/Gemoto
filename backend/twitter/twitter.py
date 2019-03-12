@@ -29,6 +29,7 @@ def handle():
                                rpp=cursor_args['rpp'],
                                result_type=cursor_args['result_type'],
                                include_entities=cursor_args['include_entities'],
+                               tweet_mode='extended',
                                lang=cursor_args['lang']).items()
         # app.logger.info("Tweets:" + str(len(tweets)))
         obj_list = [t._json for t in tweets]
