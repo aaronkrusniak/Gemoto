@@ -156,14 +156,20 @@ function addEmoLayer(emo) {
       return;
     }
     var feature = features[0];
-    var popup = new mapboxgl.Popup({ offset: [0, -15] })
+    var popup = new mapboxgl.Popup({ offset: [0, -15], anchor: "bottom" })
       .setLngLat(feature.geometry.coordinates)
       .setHTML(
-        "<h5>" +
+        "<div class=" +
+          emo +
+          ">" +
+          "<h4>" +
           feature.properties.text +
-          "</h5><p>" +
-          feature.properties[emo] +
-          "<p>"
+          "</h4><p><b>" +
+          emo.charAt(0).toUpperCase() +
+          emo.slice(1) +
+          ": </b>" +
+          feature.properties[emo].toString().slice(0, 5) +
+          "<p></div>"
       )
       .setLngLat(feature.geometry.coordinates)
       .addTo(map);
@@ -181,7 +187,7 @@ map.on("load", function() {
     addEmoLayer(e);
   }
 
-  // Only show heatmap/points for checkboxed emotions
+  // Only show heatmap/points for checkboxed emotions on initial load
   var checked = checkboxVals("emotion");
   if (checked) {
     for (let e of checked) {
@@ -195,7 +201,7 @@ map.on("load", function() {
 
   var checkDiv = document.getElementsByClassName("map-overlay-inner");
   checkDiv[0].addEventListener("click", function() {
-    // Add new emotions
+    // Make new emotions visible
     var checked = checkboxVals("emotion");
     if (checked) {
       for (let e of checked) {
@@ -207,6 +213,7 @@ map.on("load", function() {
       }
     }
 
+    // Remove visibility of any unchecked emotions
     var unchecked = findDiff(emotions, checked);
     if (unchecked) {
       for (let e of unchecked) {
@@ -218,4 +225,21 @@ map.on("load", function() {
       }
     }
   });
+
+  for (let emo of emotions) {
+    // Center the map on the coordinates of any clicked point from the emotion point map
+    map.on("click", emo + "-point-map", function(e) {
+      map.flyTo({ center: e.features[0].geometry.coordinates });
+    });
+
+    // Change the cursor to a pointer when the it enters the point layer
+    map.on("mouseenter", emo + "-point-map", function() {
+      map.getCanvas().style.cursor = "pointer";
+    });
+
+    // Change it back to a pointer when it leaves.
+    map.on("mouseleave", emo + "-point-map", function() {
+      map.getCanvas().style.cursor = "";
+    });
+  }
 });

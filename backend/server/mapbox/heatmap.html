@@ -10,7 +10,7 @@
     <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js"></script>
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css?family=Poppins"
+      href="https://fonts.googleapis.com/css?family=Poppins:400,700"
     />
     <link
       href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css"
@@ -28,6 +28,37 @@
         bottom: 0;
         width: 100%;
       }
+      .mapboxgl-popup-close-button {
+        display: none;
+      }
+      .mapboxgl-popup-content {
+        font-family: "Poppins", Sans-serif;
+        font-size: 12px;
+        padding: 0px;
+      }
+      .mapboxgl-popup-content h4 {
+        font-size: 13px;
+      }
+      .mapboxgl-popup-content .joy {
+        margin-top: -15px;
+        padding: 15px;
+        background: #FFFFE0;
+      }
+      .mapboxgl-popup-content .sadness {
+        margin-top: -15px;
+        padding: 15px;
+        background: #E6F3F7;
+      }
+      .mapboxgl-popup-content .fear {
+        margin-top: -15px;
+        padding: 15px;
+        background: #e5cce5;
+      }
+      .mapboxgl-popup-content .anger {
+        margin-top: -15px;
+        padding: 15px;
+        background: #ff7f7f;
+      }
       .map-overlay {
         position: absolute;
         width: 380px;
@@ -39,7 +70,7 @@
         background-color: #fff;
         padding: 10px;
         box-shadow:0 1px 2px rgba(0, 0, 0, 0.10);
-        border-radius: 3px;
+        border-radius: 0px 3px 3px 3px;
       }
     </style>
   </head>
