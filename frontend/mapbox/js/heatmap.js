@@ -24,25 +24,25 @@ function addEmoLayer(srcName, emo) {
       col5 = "rgb(153,52,4)";
       break;
     case "sadness":
-      col1 = "rbg(241,238,246)";
-      col2 = "rbg(189,201,225)";
-      col3 = "rbg(116,169,207)";
-      col4 = "rbg(43,140,190)";
-      col5 = "rbg(4, 90, 141)";
+      col1 = "rgb(241,238,246)";
+      col2 = "rgb(189,201,225)";
+      col3 = "rgb(116,169,207)";
+      col4 = "rgb(43,140,190)";
+      col5 = "rgb(4, 90, 141)";
       break;
     case "anger":
-      col1 = "rbg(254,220,217)";
-      col2 = "rbg(252,174,145)";
-      col3 = "rbg(251,106,74)";
-      col4 = "rbg(222,45,38)";
-      col5 = "rbg(165, 15, 21)";
+      col1 = "rgb(254,220,217)";
+      col2 = "rgb(252,174,145)";
+      col3 = "rgb(251,106,74)";
+      col4 = "rgb(222,45,38)";
+      col5 = "rgb(165, 15, 21)";
       break;
     case "fear":
-      col1 = "rbg(242,240,247)";
-      col2 = "rbg(203,201,226)";
-      col3 = "rbg(158,154,200)";
-      col4 = "rbg(117,107,177)";
-      col5 = "rbg(84, 39, 143)";
+      col1 = "rgb(242,240,247)";
+      col2 = "rgb(203,201,226)";
+      col3 = "rgb(158,154,200)";
+      col4 = "rgb(117,107,177)";
+      col5 = "rgb(84, 39, 143)";
       break;
   }
 
@@ -140,7 +140,7 @@ map.on("load", function() {
   // HARDCODED FOR JOY CURRENTLY
   map.addSource(emotions[0], {
     type: "geojson",
-    data: "http://localhost/?m=watson&t=" + emotions[0]
+    data: "http://localhost/index?t=" + emotions[0]
   });
   addEmoLayer("joy", "joy");
 });
