@@ -79,16 +79,16 @@ function addEmoLayer(emo) {
     id: emo + "-map",
     type: "heatmap",
     source: emo,
-    maxzoom: 15,
+    maxzoom: 17,
     layout: {
       visibility: "none"
     },
     paint: {
-      "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 0, 5, 22, 30],
+      "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 0, 25, 22, 50],
       "heatmap-weight": {
         property: emo,
         type: "exponential",
-        stops: [[0.5, 0], [1, 1]]
+        stops: [[0.5, 0], [1, 0.4]]
       },
       "heatmap-color": [
         "interpolate",
@@ -109,7 +109,7 @@ function addEmoLayer(emo) {
       ],
       "heatmap-opacity": {
         default: 1,
-        stops: [[14, 1], [15, 0]]
+        stops: [[16, 1], [17, 0]]
       },
       "heatmap-intensity": {
         stops: [[11, 1], [15, 3]]
@@ -120,7 +120,7 @@ function addEmoLayer(emo) {
     id: emo + "-point-map",
     type: "circle",
     source: emo,
-    minzoom: 14,
+    minzoom: 16,
     layout: {
       visibility: "none"
     },
@@ -143,7 +143,7 @@ function addEmoLayer(emo) {
         ]
       },
       "circle-opacity": {
-        stops: [[14, 0], [15, 0.7]]
+        stops: [[16, 0], [17, 0.7]]
       }
     }
   });
