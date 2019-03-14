@@ -14,6 +14,23 @@ def str2date(s):
                    int(a[1]),
                    int(a[2]))
 
+def scaleEmotion(value):
+    value = float(value)
+    if value == 0.0:
+        return str(0.0)
+    oldMin = 0.5
+    oldMax = 1.0
+
+    newMax = 1.0
+    newMin = 0.1
+
+    normVal = (value - oldMin)/(oldMax - oldMin)
+
+    normVal = normVal #Activation here
+
+    value = newMin + normVal * (newMax - newMin)
+    return str(value)
+
 @app.route("/recent", methods=["GET"])
 def handle_get_recent():
     """Gets most recent entry, which has maximum ID value"""
