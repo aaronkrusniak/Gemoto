@@ -88,7 +88,7 @@ function addEmoLayer(emo) {
       "heatmap-weight": {
         property: emo,
         type: "exponential",
-        stops: [[0.5, 0], [1, 0.4]]
+        stops: [[0, 0], [1, 1]]
       },
       "heatmap-color": [
         "interpolate",
@@ -112,7 +112,7 @@ function addEmoLayer(emo) {
         stops: [[16, 1], [17, 0]]
       },
       "heatmap-intensity": {
-        stops: [[11, 1], [15, 3]]
+        stops: [[11, 0.8], [15, 1.5]]
       }
     }
   });
@@ -126,9 +126,9 @@ function addEmoLayer(emo) {
     },
     paint: {
       "circle-color": {
-        property: "joy",
+        property: emo,
         type: "exponential",
-        stops: [[0.5, col1], [0.6, col2], [0.7, col3], [0.8, col4], [0.9, col5]]
+        stops: [[0.0, col1], [0.2, col2], [0.4, col3], [0.6, col4], [0.8, col5]]
       },
       "circle-stroke-color": "white",
       "circle-stroke-width": 1,
@@ -136,9 +136,9 @@ function addEmoLayer(emo) {
         property: emo,
         type: "exponential",
         stops: [
-          [{ zoom: 15, value: 0.5 }, 5],
-          [{ zoom: 15, value: 1 }, 10],
-          [{ zoom: 22, value: 0.5 }, 20],
+          [{ zoom: 16, value: 0 }, 5],
+          [{ zoom: 16, value: 1 }, 10],
+          [{ zoom: 22, value: 0 }, 20],
           [{ zoom: 22, value: 1 }, 50]
         ]
       },
@@ -147,6 +147,7 @@ function addEmoLayer(emo) {
       }
     }
   });
+
   map.on("click", function(e) {
     var features = map.queryRenderedFeatures(e.point, {
       layers: [emo + "-point-map"]
