@@ -70,7 +70,9 @@ def save_twitter():
                    i['properties']['name'],
                    str2date(i['properties']['date']))
                  for i in data]
-    sql = """INSERT INTO tweets(id, latitude, longitude, tweet, name, post_time) VALUES(%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING"""
+    for item in trans_data:
+        app.logger.info(item)
+    sql = """INSERT INTO tweets(id, loc, tweet, name, post_time) VALUES(%s,ST_PointFromText('POINT(%s %s)'),%s,%s,%s) ON CONFLICT DO NOTHING"""
     with conn.cursor() as cursor:
         cursor.executemany(sql, trans_data)
     conn.commit()
@@ -92,7 +94,7 @@ def unpack_watson(item):
 @app.route("/index", methods=["GET"])
 def index():
     args = request.args.to_dict()
-    sql = "SELECT tweets.id, latitude, longitude, tweet, name, post_time, joy, anger, fear, sadness FROM tweets, emotions WHERE tweets.id = emotions.id"
+    sql = "SELECT tweets.id, ST_X(ST_ASTEXT(loc)), ST_Y(ST_ASTEXT(loc)), tweet, name, post_time, joy, anger, fear, sadness FROM tweets, emotions WHERE tweets.id = emotions.id"
     if 'e' in args.keys():
         if args['e'] == 'joy':
             sql += ' AND emotions.joy >= 0.5'
@@ -150,14 +152,19 @@ def save_watson():
 @app.route("/untagged", methods=["GET"])
 def handle_get_untagged():
     with conn.cursor() as cursor:
-        cursor.execute("""SELECT * FROM tweets WHERE tweets.id NOT IN (SELECT id FROM emotions);""")
+        cursor.execute("""SELECT tweets.id,ST_X(ST_ASTEXT(loc)),ST_Y(ST_ASTEXT(loc)),tweet,name,post_time FROM tweets WHERE tweets.id NOT IN (SELECT id FROM emotions);""")
         data = cursor.fetchall()
     geojson = {'type': 'FeatureCollection',
                'features': [unpack_tweet(i) for i in data]}
     return jsonify(geojson)
 
 if __name__ == "__main__":
-    connect_str = "dbname='postgres' user='postgres' host='db' password='postgres'"
+    connect_str = "dbname='gis' user='docker' host='db' password='docker'"
     conn = psycopg2.connect(connect_str)
 
     app.run(debug=True, host="0.0.0.0")
+    with conn.cursor() as cursor:
+        cursor.execute("""SELECT table_name FROM information_schema.tables
+       WHERE table_schema = 'public'""")
+        for table in cursor.fetchall():
+            app.logger.info("Table: " + table)
