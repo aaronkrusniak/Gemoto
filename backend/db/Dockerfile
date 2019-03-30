@@ -1,5 +1,6 @@
-FROM postgres
-COPY *.sql /docker-entrypoint-initdb.d/
-ENV POSTGRES_USER postgres
-ENV POSTGRES_DB postgres
-ENV POSTGRES_PASSWORD postgres
+FROM kartoza/postgis:11.0-2.5
+ENV POSTGRES_USER docker
+ENV POSTGRES_DB gis
+ENV POSTGRES_PASSWORD docker
+ENV ALLOW_IP_RANGE 0.0.0.0/0
+ENV POSTGRES_MULTIPLE_EXTENSIONS postgis,hstore,postgis_topology
