@@ -66,7 +66,7 @@ function addEmoLayer(emo) {
       col4 = "rgb(222,45,38)";
       col5 = "rgb(165, 15, 21)";
       break;
-    case "fear":
+    case "total":
       col1 = "rgb(242,240,247)";
       col2 = "rgb(203,201,226)";
       col3 = "rgb(158,154,200)";
@@ -74,79 +74,53 @@ function addEmoLayer(emo) {
       col5 = "rgb(84, 39, 143)";
       break;
   }
-
   map.addLayer({
     id: emo + "-map",
-    type: "heatmap",
-    source: emo,
-    maxzoom: 17,
+    type: "fill-extrusion",
+    source: emo + "-hexes",
     layout: {
       visibility: "none"
     },
     paint: {
-      "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 0, 25, 22, 50],
-      "heatmap-weight": {
-        property: emo,
-        type: "exponential",
-        stops: [[0, 0], [1, 1]]
+      "fill-extrusion-height": {
+        property: "height",
+        stops: [[0, 0], [1184, 5000]]
       },
-      "heatmap-color": [
-        "interpolate",
-        ["linear"],
-        ["heatmap-density"],
-        0,
-        "rgba(0, 0, 255, 0)",
-        0.1,
-        col1,
-        0.3,
-        col2,
-        0.5,
-        col3,
-        0.7,
-        col4,
-        1,
-        col5
-      ],
-      "heatmap-opacity": {
-        default: 1,
-        stops: [[16, 1], [17, 0]]
-      },
-      "heatmap-intensity": {
-        stops: [[11, 0.8], [15, 1.5]]
-      }
+      "fill-extrusion-color": col5,
+      "fill-extrusion-opacity": 0.7
     }
   });
-  map.addLayer({
-    id: emo + "-point-map",
-    type: "circle",
-    source: emo,
-    minzoom: 16,
-    layout: {
-      visibility: "none"
-    },
-    paint: {
-      "circle-color": {
-        property: emo,
-        type: "exponential",
-        stops: [[0.0, col1], [0.2, col2], [0.4, col3], [0.6, col4], [0.8, col5]]
-      },
-      "circle-stroke-color": "white",
-      "circle-stroke-width": 1,
-      "circle-radius": {
-        property: emo,
-        type: "exponential",
-        stops: [
-          [{ zoom: 16, value: 0 }, 5],
-          [{ zoom: 16, value: 1 }, 10],
-          [{ zoom: 22, value: 0 }, 20],
-          [{ zoom: 22, value: 1 }, 50]
-        ]
-      },
-      "circle-opacity": {
-        stops: [[16, 0], [17, 0.7]]
-      }
-    }
-  });
+  // map.addLayer({
+  //   id: emo + "-point-map",
+  //   type: "circle",
+  //   source: emo,
+  //   minzoom: 16,
+  //   layout: {
+  //     visibility: "none"
+  //   },
+  //   paint: {
+  //     "circle-color": {
+  //       property: emo,
+  //       type: "exponential",
+  //       stops: [[0.0, col1], [0.2, col2], [0.4, col3], [0.6, col4], [0.8, col5]]
+  //     },
+  //     "circle-stroke-color": "white",
+  //     "circle-stroke-width": 1,
+  //     "circle-radius": {
+  //       property: emo,
+  //       type: "exponential",
+  //       stops: [
+  //         [{ zoom: 16, value: 0 }, 5],
+  //         [{ zoom: 16, value: 1 }, 10],
+  //         [{ zoom: 22, value: 0 }, 20],
+  //         [{ zoom: 22, value: 1 }, 50]
+  //       ]
+  //     },
+  //     "circle-opacity": {
+  //       stops: [[16, 0], [17, 0.8]]
+  //     }
+  //   }
+  // });
 
   map.on("click", function(e) {
     var features = map.queryRenderedFeatures(e.point, {
@@ -177,16 +151,118 @@ function addEmoLayer(emo) {
   });
 }
 
+function download(content, fileName, contentType) {
+  var a = document.createElement("a");
+  var file = new Blob([content], { type: contentType });
+  a.href = URL.createObjectURL(file);
+  a.download = fileName;
+  a.click();
+}
+
 map.on("load", function() {
-  var emotions = ["joy", "fear", "anger", "sadness"];
+  var emotions = ["joy", "total", "anger", "sadness"];
+
+  const bbox = [
+    -96.27091250682199,
+    35.92788866676072,
+    -95.714637493178,
+    36.38007453323928
+  ];
+  const hexgrid = turf.hexGrid(bbox, 1.5);
+  //download(JSON.stringify(hexgrid), "1-5km.json", "text/javascript");
+  var feats = hexgrid.features;
+  var end = [];
+
+  map.addSource("joy-hexes", {
+    type: "geojson",
+    data: joy1k
+  });
+
+  map.addSource("anger-hexes", {
+    type: "geojson",
+    data: anger1k
+  });
+
+  map.addSource("sadness-hexes", {
+    type: "geojson",
+    data: sadness1k
+  });
+
+  map.addSource("total-hexes", {
+    type: "geojson",
+    data: total1k
+  });
+
   // Populate map with all data
   for (let e of emotions) {
-    map.addSource(e, {
-      type: "geojson",
-      data: "http://129.244.254.112/index?t=" + e
-    });
+    // map.addSource(e, {
+    //   type: "geojson",
+    //   // data: "http://129.244.254.112/index?t=" + e
+    //   data: "/index?t=" + e
+    // });
     addEmoLayer(e);
   }
+
+  const url = "http://127.0.0.1/index?t=joy";
+  fetch(url)
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(d) {
+      // map.addSource("hexgrid", {
+      //   type: "geojson",
+      //   data: hexgrid
+      // });
+      // map.addLayer({
+      //   id: "hexgrid-layer",
+      //   type: "fill",
+      //   source: "hexgrid",
+      //   paint: {
+      //     "fill-color": "yellow",
+      //     "fill-opacity": 0.5
+      //   }
+      // });
+      //map.addSource("hexTulsa", { type: "geojson", data: hexgrid });
+      // map.addLayer({
+      //   id: "joy-hexlayer",
+      //   type: "fill-extrusion",
+      //   source: "joy-hexes",
+      //   paint: {
+      //     "fill-extrusion-height": {
+      //       property: "height",
+      //       stops: [[0, 0], [1184, 5000]]
+      //     },
+      //     "fill-extrusion-color": "yellow",
+      //     "fill-extrusion-opacity": 0.5
+      //   }
+      // });
+      // map.addLayer({
+      //   id: "sadness-hexlayer",
+      //   type: "fill-extrusion",
+      //   source: "sadness-hexes",
+      //   paint: {
+      //     "fill-extrusion-height": {
+      //       property: "height",
+      //       stops: [[0, 0], [1184, 5000]]
+      //     },
+      //     "fill-extrusion-color": "blue",
+      //     "fill-extrusion-opacity": 0.5
+      //   }
+      // });
+      // map.addLayer({
+      //   id: "anger-hexlayer",
+      //   type: "fill-extrusion",
+      //   source: "anger-hexes",
+      //   paint: {
+      //     "fill-extrusion-height": {
+      //       property: "height",
+      //       stops: [[0, 0], [1184, 5000]]
+      //     },
+      //     "fill-extrusion-color": "red",
+      //     "fill-extrusion-opacity": 0.5
+      //   }
+      // });
+    });
 
   // Only show heatmap/points for checkboxed emotions on initial load
   var checked = checkboxVals("emotion");
@@ -195,7 +271,7 @@ map.on("load", function() {
       var v = map.getLayoutProperty(e + "-map", "visibility");
       if (v === "none") {
         map.setLayoutProperty(e + "-map", "visibility", "visible");
-        map.setLayoutProperty(e + "-point-map", "visibility", "visible");
+        // map.setLayoutProperty(e + "-point-map", "visibility", "visible");
       }
     }
   }
@@ -209,7 +285,7 @@ map.on("load", function() {
         var v = map.getLayoutProperty(e + "-map", "visibility");
         if (v === "none") {
           map.setLayoutProperty(e + "-map", "visibility", "visible");
-          map.setLayoutProperty(e + "-point-map", "visibility", "visible");
+          // map.setLayoutProperty(e + "-point-map", "visibility", "visible");
         }
       }
     }
@@ -221,7 +297,7 @@ map.on("load", function() {
         var v = map.getLayoutProperty(e + "-map", "visibility");
         if (v === "visible") {
           map.setLayoutProperty(e + "-map", "visibility", "none");
-          map.setLayoutProperty(e + "-point-map", "visibility", "none");
+          // map.setLayoutProperty(e + "-point-map", "visibility", "none");
         }
       }
     }
