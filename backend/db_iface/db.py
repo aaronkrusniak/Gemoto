@@ -2,6 +2,7 @@
 # Authors: Benjamin T James
 from flask import Flask, request, jsonify
 import json
+import math
 import psycopg2
 import datetime as dt
 
@@ -26,7 +27,7 @@ def scaleEmotion(value):
 
     normVal = (value - oldMin) / (oldMax - oldMin)
 
-    normVal = normVal  # Activation here
+    normVal = 1 / (1 + math.exp(-normVal))  # Activation here
 
     value = newMin + normVal * (newMax - newMin)
     return value
