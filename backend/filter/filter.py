@@ -7,6 +7,43 @@ import time
 
 app = Flask(__name__)
 
+def calculateRatio(rows, rowNames):
+    indices = {'sad': rowNames.index('sadness'),
+               'joy': rowNames.index('joy'),
+               'anger': rowNames.index('anger'),
+               'fear': rowNames.index('fear')
+               }
+    sums = {'sad': 0, 'joy': 0, 'anger': 0, 'fear': 0}
+    for r in rows:
+        for i, v in indices.items():
+            sums[i] += r[v]
+
+    total = sum([v for k, v in sums.items()])
+    if total > 0:
+        ratios = {k: v/total for k, v in sums.items()}
+        return ratios
+    else:
+        return sums
+
+def calculateColor(ratio_dict):
+    return "#FFFF00"
+
+@app.route("/geo", methods=["POST"])
+def geo():
+    all_data = json.loads(request.data)
+    rownames = all_data['rownames']
+    args = all_data['args']
+    areas = all_data['data']
+    data = []
+
+    for hexid, area in areas.items():
+        cur = {}
+        cur['geometry'] = area['geometry']
+        cur['numTweets'] = len(area['rows'])
+        cur['color'] = calculateColor(calculateRatio(area['rows'], rownames))
+        cur['height'] = len(area['rows'])
+        data.append(cur)
+    return jsonify({'type': 'FeatureCollection', 'features': data})
 
 def tmreplace(in_time):
     tm = time.strptime(in_time, '%a %b %d %H:%M:%S %z %Y')

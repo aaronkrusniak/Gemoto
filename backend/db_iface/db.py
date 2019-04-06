@@ -81,6 +81,43 @@ def load_twitter():
     geojson = {"type": "FeatureCollection", "features": [unpack_tweet(i) for i in data]}
     return jsonify(geojson)
 
+@app.route("/shape", methods=["POST"])
+def load_shape():
+    args = request.args.to_dict()
+    name = args['name']
+    data = [('POLYGON((' + ', '.join([' '.join([str(z) for z in y]) for y in x['geometry']['coordinates'][0]]) + '))',) for x in json.loads(request.data)['features']]
+    sql1 = "CREATE TABLE IF NOT EXISTS " + name + """(
+    hexid SERIAL PRIMARY KEY,
+    loc GEOGRAPHY(POLYGON)
+    );"""
+    sql2 = "CREATE TABLE IF NOT EXISTS tweet_" + name + """(
+    jid SERIAL PRIMARY KEY,
+    hid INTEGER NOT NULL,
+    tid BIGINT NOT NULL
+);"""
+    sql_insert = "INSERT INTO " + name + """(hexid, loc) VALUES(DEFAULT,ST_PolygonFromText(%s)) ON CONFLICT DO NOTHING"""
+    with conn.cursor() as cursor:
+        cursor.execute(sql1)
+        cursor.execute(sql2)
+        cursor.executemany(sql_insert, data)
+    conn.commit()
+    return jsonify(["OK"])
+
+@app.route("/update_shape", methods=["GET"])
+def update_shape():
+    args = request.args.to_dict()
+    name = args['name']
+    assoc_name = 'tweet_' + name
+    db_name = name
+    sql = """WITH tjoin(hexid, tweetid) AS (
+    WITH untagged(xid, tloc) AS (
+        SELECT id, loc FROM tweets WHERE id NOT IN (SELECT tid FROM """ + assoc_name + """)
+    ) SELECT hexid, xid FROM untagged, """ + db_name + """ WHERE ST_Intersects(loc, tloc)
+) INSERT INTO """ + assoc_name + """(hid, tid) SELECT * FROM tjoin"""
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+    conn.commit()
+    return jsonify(["OK"])
 
 @app.route("/save_twitter", methods=["POST"])
 def save_twitter():
@@ -118,6 +155,41 @@ def unpack_watson(item):
         "geometry": {"coordinates": [item[1], item[2]], "type": "Point"},
     }
 
+@app.route("/tables", methods=["GET"])
+def table_names():
+    sql = """SELECT table_name FROM information_schema.tables
+                      WHERE table_schema='public'"""
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        data = cursor.fetchall()
+    return jsonify([d[0][len('tweet_'):] for d in data if d[0].startswith('tweet_')])
+
+@app.route("/newindex", methods=["GET"])
+def newindex():
+    args = request.args.to_dict()
+    if 'name' not in args.keys():
+        return jsonify({'success': False, 'error': 'A database name must be entered'}), 400
+    name = args['name']
+    with conn.cursor() as cursor:
+        sql = "WITH allhid(hid) AS (SELECT DISTINCT hid FROM tweet_" + name + ") SELECT hexid, ST_AsGeoJSON(loc) FROM " + name + ", allhid WHERE allhid.hid = hexid;"
+        cursor.execute(sql)
+        regions = cursor.fetchall()
+    data = {}
+    for r in regions:
+        data[r[0]] = {'geometry': json.loads(r[1]),
+                      'rows': []}
+    for hexid in data.keys():
+        sql = """SELECT ST_X(ST_ASTEXT(tweets.loc)),ST_Y(ST_ASTEXT(tweets.loc)),tweets.tweet,
+        tweets.name,tweets.post_time,
+        emotions.joy,emotions.anger,emotions.fear,emotions.sadness
+ FROM emotions, tweets, tweet_""" + name + " WHERE hid = " + str(hexid) + """
+ AND tid = tweets.id AND tid = emotions.id"""
+        with conn.cursor() as cursor:
+            cursor.execute(sql)
+            rowdata = cursor.fetchall()
+        data[hexid]['rows'] = rowdata
+    rownames = ['x', 'y', 'tweet', 'name', 'post_time', 'joy', 'anger', 'fear', 'sadness']
+    return jsonify({'rownames': rownames, 'data': data})
 
 @app.route("/index", methods=["GET"])
 def index():

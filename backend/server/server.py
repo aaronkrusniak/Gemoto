@@ -75,6 +75,28 @@ def post_filter(data, emotion):
                                       emotion: prop[emotion]}
         return data
 
+@app.route("/shape", methods=["POST"])
+def post_shape():
+    args = request.args.to_dict()
+    if 'name' not in args.keys():
+            return jsonify({'success': False, 'error': 'Name of db not in request arguments'}), 400
+    data = json.loads(request.data)
+    headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+    response = requests.post('http://db_iface:5000/shape?name=' + args['name'], headers=headers, json=data)
+    app.logger.info(response.text)
+    p_data = json.loads(response.text)
+    return jsonify(p_data)
+
+@app.route("/update_shape", methods=["GET"])
+def update_shape():
+    name_list = request.args.getlist('name')
+    out = {}
+    if not name_list:
+            return jsonify({'success': False, 'error': 'Please specify name(s) of the databases with the "name" parameter'}), 400
+    for k in name_list:
+            out[k] = requests.get('http://db_iface:5000/update_shape?name=' + k).text
+    return jsonify(out)
+
 @app.route("/index", methods=["GET"])
 def get_endpoint():
         args = request.args.to_dict()
@@ -86,12 +108,32 @@ def get_endpoint():
         r = requests.get(site)
         return jsonify(post_filter(json.loads(r.text), val))
 
+@app.route("/newindex", methods=["GET"])
+def get_newendpoint():
+        args = request.args.to_dict()
+        if 'name' not in args.keys():
+                return jsonify({'success': False, 'error': 'Must specify a database name with "name"'}), 400
+        site = 'http://db_iface:5000/newindex?name=' + args['name']
+        r = requests.get(site)
+        data = json.loads(r.text)
+        data['args'] = args
+        headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+        r = requests.post('http://filter:5000/geo', headers=headers, json=data)
+        p_data = json.loads(r.text)
+        return jsonify(p_data)
+
 @app.route("/query", methods=["GET"])
 def get_db():
         args = request.args.to_dict()
         site = 'http://db_iface:5000/query'
         if 'db' in args.keys():
                 site += '?db=' + args['db']
+        r = requests.get(site)
+        return jsonify(json.loads(r.text))
+
+@app.route("/list", methods=["GET"])
+def get_list():
+        site = 'http://db_iface:5000/tables'
         r = requests.get(site)
         return jsonify(json.loads(r.text))
 
