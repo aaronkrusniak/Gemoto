@@ -238,6 +238,7 @@ def total1k():
         return Response(js, mimetype="text/javascript")
 
 
+<<<<<<< HEAD
 @app.route("/js/joy1-5k.js")
 def joy15k():
     with open("mapbox/js/joy1-5k.js", "r") as fl:
@@ -245,6 +246,8 @@ def joy15k():
         return Response(js, mimetype="text/javascript")
 
 
+=======
+>>>>>>> Adding basic hex layers to current front end
 @app.route("/heatmap.html")
 def map_return():
     with open("mapbox/heatmap.html", "r") as fl:
