@@ -43,7 +43,7 @@ def geo():
         cur['color'] = calculateColor(calculateRatio(area['rows'], rownames))
         cur['height'] = len(area['rows'])
         data.append(cur)
-    return jsonify({'type': 'FeatureCollection', 'features': data})
+    return jsonify({'type': 'FeatureCollection', 'features': data, 'args': args})
 
 def tmreplace(in_time):
     tm = time.strptime(in_time, '%a %b %d %H:%M:%S %z %Y')
