@@ -136,23 +136,21 @@ def get_endpoint():
 
 @app.route("/newindex", methods=["GET"])
 def get_newendpoint():
-    args = request.args.to_dict()
-    if "name" not in args.keys():
-        return (
-            jsonify(
-                {"success": False, "error": 'Must specify a database name with "name"'}
-            ),
-            400,
-        )
-    site = "http://db_iface:5000/newindex?name=" + args["name"]
-    r = requests.get(site)
-    data = json.loads(r.text)
-    data["args"] = args
-    headers = {"Content-Type": "application/json", "Accept": "application/json"}
-    r = requests.post("http://filter:5000/geo", headers=headers, json=data)
-    p_data = json.loads(r.text)
-    return jsonify(p_data)
-
+        args = request.args.to_dict()
+        if 'name' not in args.keys():
+                return jsonify({'success': False, 'error': 'Must specify a database name with "name"'}), 400
+        site = 'http://db_iface:5000/newindex?name=' + args['name']
+        for x in request.args.getlist('t'):
+                site += '&e=' + x
+        if 'since' in args.keys():
+                site += '&since=' + args['since']
+        r = requests.get(site)
+        data = json.loads(r.text)
+        data['args'] = {k: request.args.getlist(k) for k in args.keys()}
+        headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+        r = requests.post('http://filter:5000/geo', headers=headers, json=data)
+        p_data = json.loads(r.text)
+        return jsonify(p_data)
 
 @app.route("/query", methods=["GET"])
 def get_db():

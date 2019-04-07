@@ -170,25 +170,33 @@ def newindex():
     args = request.args.to_dict()
     if 'name' not in args.keys():
         return jsonify({'success': False, 'error': 'A database name must be entered'}), 400
+    suffix = ""
+    for x in request.args.getlist('e'):
+        if x in ["joy", "anger", "fear", "sadness"]:
+            suffix += " AND emotions." + x + " >= 0.5"
+    if "since" in args.keys() and len(args['since'].split('-')) == 3:
+        suffix += " AND tweets.post_time >= to_date('" + args['since'] + "', 'MM-DD-YYYY')"
     name = args['name']
     with conn.cursor() as cursor:
         sql = "WITH allhid(hid) AS (SELECT DISTINCT hid FROM tweet_" + name + ") SELECT hexid, ST_AsGeoJSON(loc) FROM " + name + ", allhid WHERE allhid.hid = hexid;"
         cursor.execute(sql)
         regions = cursor.fetchall()
-    data = {}
+    raw_data = {}
     for r in regions:
-        data[r[0]] = {'geometry': json.loads(r[1]),
-                      'rows': []}
-    for hexid in data.keys():
+        raw_data[r[0]] = json.loads(r[1])
+    data = {}
+    for hexid in raw_data.keys():
         sql = """SELECT ST_X(ST_ASTEXT(tweets.loc)),ST_Y(ST_ASTEXT(tweets.loc)),tweets.tweet,
         tweets.name,tweets.post_time,
         emotions.joy,emotions.anger,emotions.fear,emotions.sadness
  FROM emotions, tweets, tweet_""" + name + " WHERE hid = " + str(hexid) + """
- AND tid = tweets.id AND tid = emotions.id"""
+ AND tid = tweets.id AND tid = emotions.id""" + suffix
         with conn.cursor() as cursor:
             cursor.execute(sql)
             rowdata = cursor.fetchall()
-        data[hexid]['rows'] = rowdata
+        if rowdata:
+            data[hexid] = {'rows': rowdata,
+                           'geometry': raw_data[hexid]}
     rownames = ['x', 'y', 'tweet', 'name', 'post_time', 'joy', 'anger', 'fear', 'sadness']
     return jsonify({'rownames': rownames, 'data': data})
 
