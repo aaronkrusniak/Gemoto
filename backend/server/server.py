@@ -210,6 +210,7 @@ def js_return():
         return Response(js, mimetype="text/javascript")
 
 
+<<<<<<< HEAD
 @app.route("/js/joy1k.js")
 def joy1k():
     with open("mapbox/js/joy1k.js", "r") as fl:
@@ -248,6 +249,44 @@ def joy15k():
 
 =======
 >>>>>>> Adding basic hex layers to current front end
+||||||| merged common ancestors
+@app.route("/js/joy1k.js")
+def joy1k():
+    with open("mapbox/js/joy1k.js", "r") as fl:
+        js = fl.read()
+        return Response(js, mimetype="text/javascript")
+
+
+@app.route("/js/anger1k.js")
+def anger1k():
+    with open("mapbox/js/anger1k.js", "r") as fl:
+        js = fl.read()
+        return Response(js, mimetype="text/javascript")
+
+
+@app.route("/js/sadness1k.js")
+def sadness1k():
+    with open("mapbox/js/sadness1k.js", "r") as fl:
+        js = fl.read()
+        return Response(js, mimetype="text/javascript")
+
+
+@app.route("/js/total1k.js")
+def total1k():
+    with open("mapbox/js/total1k.js", "r") as fl:
+        js = fl.read()
+        return Response(js, mimetype="text/javascript")
+
+
+@app.route("/js/joy1-5k.js")
+def joy15k():
+    with open("mapbox/js/joy1-5k.js", "r") as fl:
+        js = fl.read()
+        return Response(js, mimetype="text/javascript")
+
+
+=======
+>>>>>>> Removed ad-hoc method of loading data, implemented the zoom-in feature
 @app.route("/heatmap.html")
 def map_return():
     with open("mapbox/heatmap.html", "r") as fl:
