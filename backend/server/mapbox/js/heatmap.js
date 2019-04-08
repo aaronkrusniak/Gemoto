@@ -82,8 +82,6 @@ function addEmoLayer(emo) {
     id: emo + "-map",
     type: "fill-extrusion",
     source: emo + "-hexes",
-    type: "heatmap",
-    source: emo,
     maxzoom: 17,
     layout: {
       visibility: "none"
@@ -96,8 +94,8 @@ function addEmoLayer(emo) {
       "fill-extrusion-color": primaryCol,
       "fill-extrusion-opacity": {
         stops: [[13, 0.6], [14, 0.1]]
-      "fill-extrusion-color": col5,
-      }
+      },
+      "fill-extrusion-color": col5
     }
   });
 
@@ -110,6 +108,11 @@ function addEmoLayer(emo) {
       visibility: "none"
     },
     paint: {
+      "circle-color": {
+        property: emo,
+        type: "exponential",
+        stops: [[0.0, col1], [0.2, col2], [0.4, col3], [0.6, col4], [0.8, col5]]
+      },
       "circle-stroke-color": "white",
       "circle-stroke-width": 1,
       "circle-radius": {
@@ -176,7 +179,6 @@ function addEmoLayer(emo) {
       .addTo(map);
   });
 }
-}
 
 function download(content, fileName, contentType) {
   var a = document.createElement("a");
@@ -190,14 +192,14 @@ var previousCamera = {
   speed: 0.3
 };
 
-  // const bbox = [
-  //   -96.27091250682199,
-  //   35.92788866676072,
-  //   -95.714637493178,
-  //   36.38007453323928
-  // ];
-  // const hexgrid = turf.hexGrid(bbox, 1.5);
-  //download(JSON.stringify(hexgrid), "1-5km.json", "text/javascript");
+// const bbox = [
+//   -96.27091250682199,
+//   35.92788866676072,
+//   -95.714637493178,
+//   36.38007453323928
+// ];
+// const hexgrid = turf.hexGrid(bbox, 1.5);
+//download(JSON.stringify(hexgrid), "1-5km.json", "text/javascript");
 //
 var gridActive = {
   type: "FeatureCollection",
@@ -253,6 +255,22 @@ document.getElementById("back").onclick = returnCamera;
 map.on("load", function() {
   var emotions = ["joy", "anger", "sadness", "total"];
 
+  // Populate map with all data
+  for (let e of emotions) {
+    map.addSource(e + "-hexes", {
+      type: "geojson",
+      data: "http://129.244.254.112/newindex?name=zero_five_km&t=" + e
+      // data: "http://129.244.254.112/newindex?name=tract&t=" + e
+      // data: "/index?t=" + e
+    });
+    map.addSource(e, {
+      type: "geojson",
+      data: "http://129.244.254.112/index?name=zero_five_km&t=" + e
+      // data: "/index?t=" + e
+    });
+    addEmoLayer(e);
+  }
+
   map.on("zoom", function() {
     if (activeCamera !== "inspector") {
       var zoom = map.getZoom();
@@ -289,6 +307,7 @@ map.on("load", function() {
       }
     }
   });
+
   var activeLayer = checkboxVals("emotion")[0];
 
   map.on("mousemove", function(e) {
@@ -340,24 +359,10 @@ map.on("load", function() {
         }
       }
     }
-  // Populate map with all data
-  for (let e of emotions) {
-    map.addSource(e + "-hexes", {
-      type: "geojson",
-      data: "http://129.244.254.112/newindex?name=zero_five_km&t=" + e
-      // data: "http://129.244.254.112/newindex?name=tract&t=" + e
-      // data: "/index?t=" + e
-    });
-    map.addSource(e, {
-      type: "geojson",
-      data: "http://129.244.254.112/index?name=zero_five_km&t=" + e
-      // data: "/index?t=" + e
-    });
-    addEmoLayer(e);
-  }
-
-  // Only show heatmap/points for checkboxed emotions on initial load
+  });
+  // Only show hexes/points for checkboxed emotions on initial load
   var checked = checkboxVals("emotion");
+  console.log(checked);
   if (checked) {
     for (let e of checked) {
       var v = map.getLayoutProperty(e + "-map", "visibility");
@@ -417,5 +422,4 @@ map.on("load", function() {
       map.getCanvas().style.cursor = "";
     });
   }
-});
 });
