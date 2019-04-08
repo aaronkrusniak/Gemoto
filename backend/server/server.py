@@ -88,24 +88,39 @@ def post_filter(data, emotion):
 @app.route("/shape", methods=["POST"])
 def post_shape():
     args = request.args.to_dict()
-    if 'name' not in args.keys():
-            return jsonify({'success': False, 'error': 'Name of db not in request arguments'}), 400
+    if "name" not in args.keys():
+        return (
+            jsonify({"success": False, "error": "Name of db not in request arguments"}),
+            400,
+        )
     data = json.loads(request.data)
-    headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-    response = requests.post('http://db_iface:5000/shape?name=' + args['name'], headers=headers, json=data)
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    response = requests.post(
+        "http://db_iface:5000/shape?name=" + args["name"], headers=headers, json=data
+    )
     app.logger.info(response.text)
     p_data = json.loads(response.text)
     return jsonify(p_data)
 
+
 @app.route("/update_shape", methods=["GET"])
 def update_shape():
-    name_list = request.args.getlist('name')
+    name_list = request.args.getlist("name")
     out = {}
     if not name_list:
-            return jsonify({'success': False, 'error': 'Please specify name(s) of the databases with the "name" parameter'}), 400
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "error": 'Please specify name(s) of the databases with the "name" parameter',
+                }
+            ),
+            400,
+        )
     for k in name_list:
-            out[k] = requests.get('http://db_iface:5000/update_shape?name=' + k).text
+        out[k] = requests.get("http://db_iface:5000/update_shape?name=" + k).text
     return jsonify(out)
+
 
 @app.route("/index", methods=["GET"])
 def get_endpoint():
@@ -121,17 +136,23 @@ def get_endpoint():
 
 @app.route("/newindex", methods=["GET"])
 def get_newendpoint():
-        args = request.args.to_dict()
-        if 'name' not in args.keys():
-                return jsonify({'success': False, 'error': 'Must specify a database name with "name"'}), 400
-        site = 'http://db_iface:5000/newindex?name=' + args['name']
-        r = requests.get(site)
-        data = json.loads(r.text)
-        data['args'] = args
-        headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-        r = requests.post('http://filter:5000/geo', headers=headers, json=data)
-        p_data = json.loads(r.text)
-        return jsonify(p_data)
+    args = request.args.to_dict()
+    if "name" not in args.keys():
+        return (
+            jsonify(
+                {"success": False, "error": 'Must specify a database name with "name"'}
+            ),
+            400,
+        )
+    site = "http://db_iface:5000/newindex?name=" + args["name"]
+    r = requests.get(site)
+    data = json.loads(r.text)
+    data["args"] = args
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    r = requests.post("http://filter:5000/geo", headers=headers, json=data)
+    p_data = json.loads(r.text)
+    return jsonify(p_data)
+
 
 @app.route("/query", methods=["GET"])
 def get_db():
@@ -145,9 +166,10 @@ def get_db():
 
 @app.route("/list", methods=["GET"])
 def get_list():
-        site = 'http://db_iface:5000/tables'
-        r = requests.get(site)
-        return jsonify(json.loads(r.text))
+    site = "http://db_iface:5000/tables"
+    r = requests.get(site)
+    return jsonify(json.loads(r.text))
+
 
 @app.route("/refresh", methods=["GET"])
 def get_refresh():
@@ -210,83 +232,6 @@ def js_return():
         return Response(js, mimetype="text/javascript")
 
 
-<<<<<<< HEAD
-@app.route("/js/joy1k.js")
-def joy1k():
-    with open("mapbox/js/joy1k.js", "r") as fl:
-        js = fl.read()
-        return Response(js, mimetype="text/javascript")
-
-
-@app.route("/js/anger1k.js")
-def anger1k():
-    with open("mapbox/js/anger1k.js", "r") as fl:
-        js = fl.read()
-        return Response(js, mimetype="text/javascript")
-
-
-@app.route("/js/sadness1k.js")
-def sadness1k():
-    with open("mapbox/js/sadness1k.js", "r") as fl:
-        js = fl.read()
-        return Response(js, mimetype="text/javascript")
-
-
-@app.route("/js/total1k.js")
-def total1k():
-    with open("mapbox/js/total1k.js", "r") as fl:
-        js = fl.read()
-        return Response(js, mimetype="text/javascript")
-
-
-<<<<<<< HEAD
-@app.route("/js/joy1-5k.js")
-def joy15k():
-    with open("mapbox/js/joy1-5k.js", "r") as fl:
-        js = fl.read()
-        return Response(js, mimetype="text/javascript")
-
-
-=======
->>>>>>> Adding basic hex layers to current front end
-||||||| merged common ancestors
-@app.route("/js/joy1k.js")
-def joy1k():
-    with open("mapbox/js/joy1k.js", "r") as fl:
-        js = fl.read()
-        return Response(js, mimetype="text/javascript")
-
-
-@app.route("/js/anger1k.js")
-def anger1k():
-    with open("mapbox/js/anger1k.js", "r") as fl:
-        js = fl.read()
-        return Response(js, mimetype="text/javascript")
-
-
-@app.route("/js/sadness1k.js")
-def sadness1k():
-    with open("mapbox/js/sadness1k.js", "r") as fl:
-        js = fl.read()
-        return Response(js, mimetype="text/javascript")
-
-
-@app.route("/js/total1k.js")
-def total1k():
-    with open("mapbox/js/total1k.js", "r") as fl:
-        js = fl.read()
-        return Response(js, mimetype="text/javascript")
-
-
-@app.route("/js/joy1-5k.js")
-def joy15k():
-    with open("mapbox/js/joy1-5k.js", "r") as fl:
-        js = fl.read()
-        return Response(js, mimetype="text/javascript")
-
-
-=======
->>>>>>> Removed ad-hoc method of loading data, implemented the zoom-in feature
 @app.route("/heatmap.html")
 def map_return():
     with open("mapbox/heatmap.html", "r") as fl:

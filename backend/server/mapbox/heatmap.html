@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Display a map</title>
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Poppins:400,700"
+    />
+    <link
+      href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+          font-family: "Poppins", sans-serif;
+      }
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
+      .mapboxgl-popup-close-button {
+        display: none;
+      }
+      .mapboxgl-popup-content {
+        font-family: "Poppins", Sans-serif;
+        font-size: 12px;
+        padding: 0px;
+      }
+      .mapboxgl-popup-content h4 {
+        font-size: 13px;
+      }
+      .mapboxgl-popup-content .joy {
+        margin-top: -15px;
+        padding: 15px;
+        background: #FFFFE0;
+      }
+      .mapboxgl-popup-content .sadness {
+        margin-top: -15px;
+        padding: 15px;
+        background: #E6F3F7;
+      }
+      .mapboxgl-popup-content .fear {
+        margin-top: -15px;
+        padding: 15px;
+        background: #e5cce5;
+      }
+      .mapboxgl-popup-content .anger {
+        margin-top: -15px;
+        padding: 15px;
+        background: #ff9999;
+      }
+      .map-overlay {
+        position: absolute;
+        width: 380px;
+        top: 0;
+        left: 0;
+        padding 20px;
+      }
+      .map-overlay .map-overlay-inner {
+        background-color: #fff;
+        padding: 10px;
+        box-shadow:0 1px 2px rgba(0, 0, 0, 0.10);
+        border-radius: 0px 3px 3px 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div class="map-overlay">
+      <div class="map-overlay-inner">
+        <input type="checkbox" name="emotion" value="joy" checked="checked" />
+        Joy &nbsp;&nbsp;&nbsp;&nbsp;
+        <input
+          type="checkbox"
+          name="emotion"
+          value="sadness"
+          checked="checked"
+        />
+        Sadness &nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="checkbox" name="emotion" value="anger" /> Anger
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="checkbox" name="emotion" value="total" /> Total
+      </div>
+    </div>
+    <script src="js/total1k.js" type="text/javascript"></script>
+    <script src="js/joy1k.js" type="text/javascript"></script>
+    <script src="js/anger1k.js" type="text/javascript"></script>
+    <script src="js/sadness1k.js" type="text/javascript"></script>
+    <script src="js/joy1-5k.js" type="text/javascript"></script>
+    <script src="js/heatmap.js"></script>
+  </body>
+</html>
