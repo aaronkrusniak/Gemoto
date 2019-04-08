@@ -154,43 +154,64 @@ function addEmoLayer(emo, gran) {
   });
 
   if (!map.getLayer(emo + "-point-map")) {
-    map.addLayer({
-      id: emo + "-point-map",
-      type: "circle",
-      source: emo,
-      minzoom: 14,
-      layout: {
-        visibility: "none"
-      },
-      paint: {
-        "circle-color": {
-          property: emo,
-          type: "exponential",
-          stops: [
-            [0.0, col1],
-            [0.2, col2],
-            [0.4, col3],
-            [0.6, col4],
-            [0.8, col5]
-          ]
+    if (emo == "total") {
+      map.addLayer({
+        id: emo + "-point-map",
+        type: "circle",
+        source: emo,
+        minzoom: 14,
+        layout: {
+          visibility: "none"
         },
-        "circle-stroke-color": "white",
-        "circle-stroke-width": 1,
-        "circle-radius": {
-          property: emo,
-          type: "exponential",
-          stops: [
-            [{ zoom: 14, value: 0 }, 5],
-            [{ zoom: 14, value: 1 }, 10],
-            [{ zoom: 22, value: 0 }, 20],
-            [{ zoom: 22, value: 1 }, 50]
-          ]
-        },
-        "circle-opacity": {
-          stops: [[13, 0], [14, 0.8]]
+        paint: {
+          "circle-color": primaryCol,
+          "circle-stroke-color": "white",
+          "circle-stroke-width": 1,
+          "circle-radius": 15,
+          "circle-opacity": {
+            stops: [[13, 0], [14, 0.8]]
+          }
         }
-      }
-    });
+      });
+    } else {
+      map.addLayer({
+        id: emo + "-point-map",
+        type: "circle",
+        source: emo,
+        minzoom: 14,
+        layout: {
+          visibility: "none"
+        },
+        paint: {
+          "circle-color": {
+            property: emo,
+            type: "exponential",
+            stops: [
+              [0.0, col1],
+              [0.2, col2],
+              [0.4, col3],
+              [0.6, col4],
+              [0.8, col5]
+            ]
+          },
+          "circle-stroke-color": "white",
+          "circle-stroke-width": 1,
+          "circle-radius": {
+            property: emo,
+            type: "exponential",
+            stops: [
+              [{ zoom: 14, value: 0 }, 5],
+              [{ zoom: 14, value: 1 }, 10],
+              [{ zoom: 22, value: 0 }, 20],
+              [{ zoom: 22, value: 1 }, 50]
+            ]
+          },
+          "circle-opacity": {
+            stops: [[13, 0], [14, 0.8]]
+          }
+        }
+      });
+    }
   }
 
   // Add pop ups to circles
@@ -203,6 +224,15 @@ function addEmoLayer(emo, gran) {
       return;
     }
     var feature = features[0];
+    var emoVal = "";
+    var emoDisplay = "";
+
+    // Check if tone value is available
+    if (feature.properties[emo]) {
+      emoVal = feature.properties[emo].toString().slice(0, 5);
+      emoDisplay = emo.charAt(0).toUpperCase() + emo.slice(1) + ": ";
+    }
+
     var popup = new mapboxgl.Popup({ offset: [0, -15], anchor: "bottom" })
       .setLngLat(feature.geometry.coordinates)
       .setHTML(
@@ -212,10 +242,9 @@ function addEmoLayer(emo, gran) {
           "<h4>" +
           feature.properties.text +
           "</h4><p><b>" +
-          emo.charAt(0).toUpperCase() +
-          emo.slice(1) +
-          ": </b>" +
-          feature.properties[emo].toString().slice(0, 5) +
+          emoDisplay +
+          "</b>" +
+          emoVal +
           "<p></div>"
       )
       .setLngLat(feature.geometry.coordinates)
