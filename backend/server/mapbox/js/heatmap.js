@@ -124,11 +124,14 @@ function addEmoLayer(emo, gran) {
         property: "height",
         stops: [[0, 0], [1, 5000]]
       },
-      "fill-extrusion-color": primaryCol,
+      // "fill-extrusion-color": primaryCol,
+      "fill-extrusion-color": {
+        property: "color",
+        type: "identity"
+      },
       "fill-extrusion-opacity": {
         stops: [[13, 0.6], [14, 0.1]]
-      },
-      "fill-extrusion-color": col5
+      }
     }
   });
 
@@ -165,6 +168,31 @@ function addEmoLayer(emo, gran) {
         },
         paint: {
           "circle-color": primaryCol,
+          //"circle-color": [
+          //  "interpolate",
+          //  ["linear"],
+          //  [
+          //    "case",
+          //    ["has", "joy"],
+          //    ["get", "joy"],
+          //    ["has", "anger"],
+          //    ["get", "anger"],
+          //    ["has", "sadness"],
+          //    ["get", "sadness"],
+          //    0.2
+          //    //ADd fallback value
+          //  ],
+          //  0.0,
+          //  col1,
+          //  0.2,
+          //  col2,
+          //  0.4,
+          //  col3,
+          //  0.6,
+          //  col4,
+          //  0.8,
+          //  col5
+          //],
           "circle-stroke-color": "white",
           "circle-stroke-width": 1,
           "circle-radius": 15,
@@ -376,14 +404,14 @@ map.on("load", function() {
     }
   }
 
-  map.on("zoom", function() {
-    if (activeCamera !== "inspector") {
-      var zoom = map.getZoom();
-      activeCamera = zoom > 14 ? "dotted" : "hexbin";
-      var activeLayer = checkboxVals("emotion")[0];
-      //setLayers(activeLayer);
-    }
-  });
+  //map.on("zoom", function() {
+  //  if (activeCamera !== "inspector") {
+  //    var zoom = map.getZoom();
+  //    activeCamera = zoom > 14 ? "dotted" : "hexbin";
+  //    var activeLayer = checkboxVals("emotion")[0];
+  //    //setLayers(activeLayer);
+  //  }
+  //});
 
   // Highlight the bin
   map.addSource("grid-active", {
@@ -457,7 +485,7 @@ map.on("load", function() {
           var center = turf.center(gridActive);
           map.flyTo({
             center: center.geometry.coordinates,
-            zoom: 15,
+            zoom: 14.5,
             pitch: 0,
             speed: 0.3
           });
