@@ -16,6 +16,8 @@ var previousCamera = {
 };
 const gran = document.getElementById("myRange");
 const emotions = ["joy", "anger", "sadness", "total"];
+
+var popups = [];
 const grans = {
   1: "zero_five_km",
   2: "one_km",
@@ -195,7 +197,7 @@ function addEmoLayer(emo, gran) {
           //],
           "circle-stroke-color": "white",
           "circle-stroke-width": 1,
-          "circle-radius": 15,
+          "circle-radius": 7,
           "circle-opacity": {
             stops: [[13, 0], [14, 0.8]]
           }
@@ -255,12 +257,12 @@ function addEmoLayer(emo, gran) {
     var emoVal = "";
     var emoDisplay = "";
 
-    // Check if tone value is available
-    if (feature.properties[emo]) {
-      emoVal = feature.properties[emo].toString().slice(0, 5);
-      emoDisplay = emo.charAt(0).toUpperCase() + emo.slice(1) + ": ";
+    for (let e of emotions) {
+      if (e in feature.properties) {
+        emoVal = feature.properties[e].toString().slice(0, 5);
+        emoDisplay = e.charAt(0).toUpperCase() + e.slice(1) + ": ";
+      }
     }
-
     var d = feature.properties.date;
 
     var popup = new mapboxgl.Popup({ offset: [0, -15], anchor: "bottom" })
@@ -281,6 +283,8 @@ function addEmoLayer(emo, gran) {
       )
       .setLngLat(feature.geometry.coordinates)
       .addTo(map);
+
+    popups.push(popup);
   });
 }
 
@@ -329,6 +333,14 @@ function returnCamera() {
   });
   setLayers(activeLayer);
 
+  // Remove any open popups
+  for (let pop of popups) {
+    if (pop.isOpen()) {
+      pop.remove();
+    }
+  }
+  popups = [];
+
   map.flyTo(previousCamera, animationOptions);
   $("#back").hide();
 }
@@ -354,6 +366,7 @@ function showLayer() {
           "visible"
         );
         map.setLayoutProperty(e + "-point-map", "visibility", "visible");
+        //map.setLayoutProperty("grid-active", "visibility", "none");
       }
       var diffGrans = findDiff(Object.values(grans), [grans[gran.value]]);
       for (let g of diffGrans) {
@@ -361,6 +374,8 @@ function showLayer() {
         map.setLayoutProperty(e + "-" + g + "-count", "visibility", "none");
       }
     }
+    gridActive.features = [];
+    map.getSource("grid-active").setData(gridActive);
   }
   // Remove visibility of any unchecked emotions
   var unchecked = findDiff(emotions, checked);
