@@ -261,6 +261,8 @@ function addEmoLayer(emo, gran) {
       emoDisplay = emo.charAt(0).toUpperCase() + emo.slice(1) + ": ";
     }
 
+    var d = feature.properties.date;
+
     var popup = new mapboxgl.Popup({ offset: [0, -15], anchor: "bottom" })
       .setLngLat(feature.geometry.coordinates)
       .setHTML(
@@ -273,6 +275,8 @@ function addEmoLayer(emo, gran) {
           emoDisplay +
           "</b>" +
           emoVal +
+          " | <b>Date: </b> " +
+          d.toString().slice(0, -13) +
           "<p></div>"
       )
       .setLngLat(feature.geometry.coordinates)
@@ -380,6 +384,19 @@ function showLayer() {
         map.setLayoutProperty(e + "-point-map", "visibility", "none");
       }
     }
+  }
+}
+
+function filterDate() {
+  var activeLayer = checkboxVals("emotion")[0];
+  var activeGran = grans[gran.value];
+  var features = map.queryRenderedFeatures({
+    layers: [activeLayer + "-" + activeGran + "-map"]
+  });
+
+  if (features) {
+    // Add a filter function to the active layer
+    // map.setFilter(activeLayer + "-" + activeGran + "-map", )
   }
 }
 
