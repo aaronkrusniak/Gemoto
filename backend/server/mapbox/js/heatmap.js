@@ -16,6 +16,8 @@ var previousCamera = {
 };
 const gran = document.getElementById("myRange");
 const emotions = ["joy", "anger", "sadness", "total"];
+
+var popups = [];
 const grans = {
   1: "zero_five_km",
   2: "one_km",
@@ -167,35 +169,62 @@ function addEmoLayer(emo, gran) {
           visibility: "none"
         },
         paint: {
-          "circle-color": primaryCol,
-          //"circle-color": [
-          //  "interpolate",
-          //  ["linear"],
-          //  [
-          //    "case",
-          //    ["has", "joy"],
-          //    ["get", "joy"],
-          //    ["has", "anger"],
-          //    ["get", "anger"],
-          //    ["has", "sadness"],
-          //    ["get", "sadness"],
-          //    0.2
-          //    //ADd fallback value
-          //  ],
-          //  0.0,
-          //  col1,
-          //  0.2,
-          //  col2,
-          //  0.4,
-          //  col3,
-          //  0.6,
-          //  col4,
-          //  0.8,
-          //  col5
-          //],
+          // "circle-color": primaryCol,
+          "circle-color": [
+            "interpolate",
+            ["linear"],
+            [
+              "case",
+              ["has", "joy"],
+              ["to-number", ["get", "joy"]],
+              ["has", "anger"],
+              ["to-number", ["get", "anger"]],
+              ["has", "sadness"],
+              ["to-number", ["get", "sadness"]],
+              0.2
+            ],
+            0.0,
+            [
+              "case",
+              ["has", "joy"],
+              "rgb(255,255,212)",
+              ["has", "anger"],
+              "rgb(254,220,217)",
+              ["has", "sadness"],
+              "rgb(241,238,246)",
+              col1
+            ],
+            // 0.2,
+            // col2,
+            // 0.4,
+            // col3,
+            // 0.6,
+            // col4,
+            0.8,
+            [
+              "case",
+              ["has", "joy"],
+              "rgb(153,52,4)",
+              ["has", "anger"],
+              "rgb(165, 15, 21)",
+              ["has", "sadness"],
+              "rgb(4, 90, 141)",
+              col5
+            ]
+          ],
           "circle-stroke-color": "white",
           "circle-stroke-width": 1,
-          "circle-radius": 15,
+          "circle-radius": 7,
+          // "circle-radius": {
+          //   property: emo,
+          //   type: "exponential",
+          //   stops: [
+          //     [{ zoom: 14, value: 0 }, 5],
+          //     [{ zoom: 14, value: 1 }, 10],
+          //     [{ zoom: 22, value: 0 }, 20],
+          //     [{ zoom: 22, value: 1 }, 50]
+          //   ]
+          // },
           "circle-opacity": {
             stops: [[13, 0], [14, 0.8]]
           }
@@ -254,20 +283,22 @@ function addEmoLayer(emo, gran) {
     var feature = features[0];
     var emoVal = "";
     var emoDisplay = "";
+    var setE;
 
-    // Check if tone value is available
-    if (feature.properties[emo]) {
-      emoVal = feature.properties[emo].toString().slice(0, 5);
-      emoDisplay = emo.charAt(0).toUpperCase() + emo.slice(1) + ": ";
+    for (let e of emotions) {
+      if (e in feature.properties) {
+        emoVal = feature.properties[e].toString().slice(0, 5);
+        emoDisplay = e.charAt(0).toUpperCase() + e.slice(1) + ": ";
+        setE = e;
+      }
     }
-
     var d = feature.properties.date;
 
     var popup = new mapboxgl.Popup({ offset: [0, -15], anchor: "bottom" })
       .setLngLat(feature.geometry.coordinates)
       .setHTML(
         "<div class=" +
-          emo +
+          setE +
           ">" +
           "<h4>" +
           feature.properties.text +
@@ -281,6 +312,8 @@ function addEmoLayer(emo, gran) {
       )
       .setLngLat(feature.geometry.coordinates)
       .addTo(map);
+
+    popups.push(popup);
   });
 }
 
@@ -329,6 +362,14 @@ function returnCamera() {
   });
   setLayers(activeLayer);
 
+  // Remove any open popups
+  for (let pop of popups) {
+    if (pop.isOpen()) {
+      pop.remove();
+    }
+  }
+  popups = [];
+
   map.flyTo(previousCamera, animationOptions);
   $("#back").hide();
 }
@@ -354,11 +395,21 @@ function showLayer() {
           "visible"
         );
         map.setLayoutProperty(e + "-point-map", "visibility", "visible");
+        //map.setLayoutProperty("grid-active", "visibility", "none");
       }
       var diffGrans = findDiff(Object.values(grans), [grans[gran.value]]);
       for (let g of diffGrans) {
         map.setLayoutProperty(e + "-" + g + "-map", "visibility", "none");
         map.setLayoutProperty(e + "-" + g + "-count", "visibility", "none");
+      }
+    }
+    gridActive.features = [];
+    map.getSource("grid-active").setData(gridActive);
+
+    // Remove popups
+    for (let pop of popups) {
+      if (pop.isOpen()) {
+        pop.remove();
       }
     }
   }
@@ -405,6 +456,12 @@ gran.onchange = showLayer;
 
 map.on("load", function() {
   var granularities = ["zero_five_km", "one_km", "one_five_km"];
+
+  map.addControl(
+    new mapboxgl.NavigationControl({
+      position: "top-right"
+    })
+  );
 
   // Populate map with all data
   for (let e of emotions) {
