@@ -12,6 +12,13 @@
   <script async defer src="https://api.mapbox.com/mapbox-assembly/v0.13.0/assembly.js"></script>
   <link href="https://fonts.googleapis.com/css?family=Zilla+Slab" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+  
+  <!-- This stuff is really just for the date picker: -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+  
   <style>
   body {
     margin: 0;
@@ -248,7 +255,7 @@
   </div>
   
   <!-- SIDEBAR -->
-  <div id='sidebar' class='w240-mm w-full prose h-full-mm color-white border-r border--black absolute top-mm bottom left p12 p24-mm opacity100-mm z4'>
+  <div id='sidebar' class='w300-mm w-full prose h-full-mm color-white border-r border--black absolute top-mm bottom left p12 p24-mm opacity100-mm z4'>
     <div id='title' class='py12'>
       <h1 class='custom-Zilla custom-headtext'>Gemoto</h1>
     </div>
@@ -319,6 +326,18 @@
         </label>
       </div>
     </div>
+    <br>
+    <!-- Date selector -->
+    <div id='types' class='pt12 border-t border--black none block-mm'>
+      <small class='align-center txt-s txt-uppercase color-gray-light'>Date Range</small>
+      <div class="slidecontainer align-center">
+        <div class='legend flex-parent flex-parent--wrap'>
+          <input type="text" name="daterange" value="03/21/2019 - 01/15/2018" style="width:300px">
+        </div>
+      </div>
+    </div>
+    <br>
+    <!-- Scale selector -->
     <div id='types' class='pt12 border-t border--black none block-mm'>
       <small class='align-center txt-s txt-uppercase color-gray-light'>Scale</small>
       <div class="slidecontainer align-center">
@@ -330,3 +349,35 @@
 </body>
 
 </html>
+
+<script>
+$(function() {
+
+    var start = moment().subtract(29, 'days');
+    var end = moment();
+
+    function cb(start, end) {
+        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+    }
+
+    $('input[name="daterange"]').daterangepicker({
+    "showDropdowns": true,
+    "minYear": 2019,
+    ranges: {
+        'Today': [moment(), moment()],
+        'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+        'This Month': [moment().startOf('month'), moment().endOf('month')],
+        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+    },
+    "startDate": start,
+    "endDate": end,
+    "minDate": "03/21/2019",
+    "drops": "up"
+    }, cb);
+
+    cb(start, end);
+
+});
+</script>
