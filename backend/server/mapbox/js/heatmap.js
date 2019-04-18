@@ -73,7 +73,7 @@ var gridActive = {
 };
 
 var activeCamera = "hexbin";
-var animationOptions = { duration: 5000, easing: 0.4 };
+var animationOptions = { duration: 3000, easing: 0.3 };
 
 // Date picker
 $('input[name="daterange"]').on("apply.daterangepicker", function(ev, picker) {
