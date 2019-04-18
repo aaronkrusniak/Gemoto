@@ -1,6 +1,20 @@
 mapboxgl.accessToken =
   "pk.eyJ1IjoidG9tbGVld3UiLCJhIjoiY2pzZHo3eXZxMTE2NzQ2b2E4Y3BycHNjZyJ9.7QT62BItg33RniE2SMuBDg";
 
+var tumarker = {
+  type: 'FeatureCollection',
+  features: [{
+    type: 'Feature',
+    geometry: {
+      type: 'Point',
+      coordinates: [-95.946523, 36.152253]
+    },
+    properties: {
+      title: 'The University of Tulsa',
+    }
+  }]
+};
+
 const map = new mapboxgl.Map({
   container: "map",
   style: "mapbox://styles/mapbox/dark-v9",
@@ -798,4 +812,17 @@ map.on("load", function() {
     inputs[i].addEventListener("click", showLayer);
   }
   refreshPopupFocus();
+  
+  // add markers to map
+  tumarker.features.forEach(function(marker) {
+
+    // create a HTML element for each feature
+    var el = document.createElement('div');
+    el.className = 'marker';
+
+    // make a marker for each feature and add to the map
+    new mapboxgl.Marker(el)
+      .setLngLat(marker.geometry.coordinates)
+      .addTo(map);
+  });
 });
