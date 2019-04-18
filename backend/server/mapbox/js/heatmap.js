@@ -814,7 +814,6 @@ map.on("load", function() {
     inputs[i].addEventListener("click", showLayer);
   }
   refreshPopupFocus();
-<<<<<<< HEAD
   
   // add markers to map
   tumarker.features.forEach(function(marker) {
@@ -828,7 +827,7 @@ map.on("load", function() {
       .setLngLat(marker.geometry.coordinates)
       .addTo(map);
   });
-=======
+
   var layers = map.getStyle().layers;
 
   var labelLayerId;
@@ -875,5 +874,4 @@ map.on("load", function() {
     },
     labelLayerId
   );
->>>>>>> ce24c18b55d398720eb58d48c8fe46762f7f980a
 });
