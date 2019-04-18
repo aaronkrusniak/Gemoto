@@ -10,12 +10,46 @@ const map = new mapboxgl.Map({
 });
 
 // DEFINING VARIABLES
+const granularities = ["zero_five_km", "one_km", "one_five_km"];
+const layers = [
+  "joy-zero_five_km-map",
+  "joy-zero_five_km-count",
+  "joy-one_km-map",
+  "joy-one_km-count",
+  "joy-one_five_km-map",
+  "joy-one_five_km-count",
+  "joy-point-map",
+  "sadness-zero_five_km-map",
+  "sadness-zero_five_km-count",
+  "sadness-one_km-map",
+  "sadness-one_km-count",
+  "sadness-one_five_km-map",
+  "sadness-one_five_km-count",
+  "sadness-point-map",
+  "total-zero_five_km-map",
+  "total-zero_five_km-count",
+  "total-point-map",
+  "total-one_km-map",
+  "total-one_km-count",
+  "total-one_five_km-map",
+  "total-one_five_km-count",
+  "anger-zero_five_km-map",
+  "anger-zero_five_km-count",
+  "anger-one_km-map",
+  "anger-one_km-count",
+  "anger-map",
+  "anger-one_five_km-map",
+  "anger-one_five_km-count",
+  "anger-point-map"
+];
 
 var previousCamera = {
-  speed: 0.3
+  speed: 0.4
 };
 const gran = document.getElementById("myRange");
 const emotions = ["joy", "anger", "sadness", "total"];
+
+var dateString = "";
 
 var popups = [];
 const grans = {
@@ -41,6 +75,53 @@ var gridActive = {
 var activeCamera = "hexbin";
 var animationOptions = { duration: 5000, easing: 0.4 };
 
+// Date picker
+$('input[name="daterange"]').on("apply.daterangepicker", function(ev, picker) {
+  sDate = picker.startDate.format("MM-DD-YYYY");
+  eDate = picker.endDate.format("MM-DD-YYYY");
+
+  // Hide current layers
+  hideAllLayers();
+
+  // Remove date sources (so names can be reused)
+  removeSources();
+
+  dateString = "Date";
+
+  refreshPopupFocus();
+
+  for (let e of emotions) {
+    map.addSource(e + "Date", {
+      type: "geojson",
+      data:
+        "http://129.244.254.112/index?t=" +
+        e +
+        "&from=" +
+        sDate +
+        "&to=" +
+        eDate
+    });
+
+    for (let g of granularities) {
+      map.addSource(e + g + "-hexesDate", {
+        type: "geojson",
+        data:
+          "http://129.244.254.112/newindex?name=" +
+          g +
+          "&t=" +
+          e +
+          "&from=" +
+          sDate +
+          "&to=" +
+          eDate
+      });
+      addEmoLayer(e, g);
+    }
+  }
+  showLayer();
+  map.moveLayer("grid-active");
+});
+
 // DEFINING FUNCTIONS
 function findDiff(a1, a2) {
   var result = [];
@@ -58,8 +139,9 @@ function findDiff(a1, a2) {
   return result;
 }
 
-function checkboxVals(name) {
-  var boxes = document.getElementsByName(name);
+// Gets currently selected emotion
+function checkboxVals() {
+  var boxes = document.getElementsByName("emotion");
   var retArr = [];
 
   for (var i = 0; i < boxes.length; i++) {
@@ -114,9 +196,9 @@ function addEmoLayer(emo, gran) {
 
   // Add hexbin layer
   map.addLayer({
-    id: emo + "-" + gran + "-map",
+    id: emo + "-" + gran + "-map" + dateString,
     type: "fill-extrusion",
-    source: emo + gran + "-hexes",
+    source: emo + gran + "-hexes" + dateString,
     maxzoom: 17,
     layout: {
       visibility: "none"
@@ -126,7 +208,6 @@ function addEmoLayer(emo, gran) {
         property: "height",
         stops: [[0, 0], [1, 5000]]
       },
-      // "fill-extrusion-color": primaryCol,
       "fill-extrusion-color": {
         property: "color",
         type: "identity"
@@ -139,9 +220,9 @@ function addEmoLayer(emo, gran) {
 
   // Add count of tweets within hexbin layer
   map.addLayer({
-    id: emo + "-" + gran + "-count",
+    id: emo + "-" + gran + "-count" + dateString,
     type: "symbol",
-    source: emo + gran + "-hexes",
+    source: emo + gran + "-hexes" + dateString,
     layout: {
       "text-field": "{numTweets}",
       "text-size": 14,
@@ -158,18 +239,17 @@ function addEmoLayer(emo, gran) {
     }
   });
 
-  if (!map.getLayer(emo + "-point-map")) {
+  if (!map.getLayer(emo + "-point-map" + dateString)) {
     if (emo == "total") {
       map.addLayer({
-        id: emo + "-point-map",
+        id: emo + "-point-map" + dateString,
         type: "circle",
-        source: emo,
+        source: emo + dateString,
         minzoom: 14,
         layout: {
           visibility: "none"
         },
         paint: {
-          // "circle-color": primaryCol,
           "circle-color": [
             "interpolate",
             ["linear"],
@@ -194,12 +274,39 @@ function addEmoLayer(emo, gran) {
               "rgb(241,238,246)",
               col1
             ],
-            // 0.2,
-            // col2,
-            // 0.4,
-            // col3,
-            // 0.6,
-            // col4,
+            0.2,
+            [
+              "case",
+              ["has", "joy"],
+              "rgb(254,217,142)",
+              ["has", "anger"],
+              "rgb(252,174,145)",
+              ["has", "sadness"],
+              "rgb(189,201,225)",
+              col2
+            ],
+            0.4,
+            [
+              "case",
+              ["has", "joy"],
+              "rgb(254,153,41)",
+              ["has", "anger"],
+              "rgb(251,106,74)",
+              ["has", "sadness"],
+              "rgb(116,169,207)",
+              col3
+            ],
+            0.6,
+            [
+              "case",
+              ["has", "joy"],
+              "rgb(217,95, 14)",
+              ["has", "anger"],
+              "rgb(222,45,38)",
+              ["has", "sadness"],
+              "rgb(43,140,190)",
+              col4
+            ],
             0.8,
             [
               "case",
@@ -214,17 +321,41 @@ function addEmoLayer(emo, gran) {
           ],
           "circle-stroke-color": "white",
           "circle-stroke-width": 1,
-          "circle-radius": 7,
-          // "circle-radius": {
-          //   property: emo,
-          //   type: "exponential",
-          //   stops: [
-          //     [{ zoom: 14, value: 0 }, 5],
-          //     [{ zoom: 14, value: 1 }, 10],
-          //     [{ zoom: 22, value: 0 }, 20],
-          //     [{ zoom: 22, value: 1 }, 50]
-          //   ]
-          // },
+          "circle-radius": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            14,
+            [
+              "*",
+              15,
+              [
+                "case",
+                ["has", "joy"],
+                ["to-number", ["get", "joy"]],
+                ["has", "anger"],
+                ["to-number", ["get", "anger"]],
+                ["has", "sadness"],
+                ["to-number", ["get", "sadness"]],
+                0.2
+              ]
+            ],
+            22,
+            [
+              "*",
+              30,
+              [
+                "case",
+                ["has", "joy"],
+                ["to-number", ["get", "joy"]],
+                ["has", "anger"],
+                ["to-number", ["get", "anger"]],
+                ["has", "sadness"],
+                ["to-number", ["get", "sadness"]],
+                0.2
+              ]
+            ]
+          ],
           "circle-opacity": {
             stops: [[13, 0], [14, 0.8]]
           }
@@ -232,9 +363,9 @@ function addEmoLayer(emo, gran) {
       });
     } else {
       map.addLayer({
-        id: emo + "-point-map",
+        id: emo + "-point-map" + dateString,
         type: "circle",
-        source: emo,
+        source: emo + dateString,
         minzoom: 14,
         layout: {
           visibility: "none"
@@ -274,7 +405,7 @@ function addEmoLayer(emo, gran) {
   // Add pop ups to circles
   map.on("click", function(e) {
     var features = map.queryRenderedFeatures(e.point, {
-      layers: [emo + "-point-map"]
+      layers: [emo + "-point-map" + dateString]
     });
 
     if (!features.length) {
@@ -320,7 +451,7 @@ function addEmoLayer(emo, gran) {
 function setLayers(activeLayer) {
   if (activeCamera === "hexbin") {
     map.setPaintProperty(
-      activeLayer + "-" + grans[gran.value] + "-map",
+      activeLayer + "-" + grans[gran.value] + "-map" + dateString,
       "fill-extrusion-opacity",
       {
         stops: [[13, 0.6], [14, 0.1]]
@@ -330,9 +461,13 @@ function setLayers(activeLayer) {
       stops: [[14, 0.6], [15, 0.1]]
     });
   } else if (activeCamera === "inspector") {
-    map.setPaintProperty(activeLayer + "-point-map", "circle-opacity", 0.8);
     map.setPaintProperty(
-      activeLayer + "-" + grans[gran.value] + "-map",
+      activeLayer + "-point-map" + dateString,
+      "circle-opacity",
+      0.8
+    );
+    map.setPaintProperty(
+      activeLayer + "-" + grans[gran.value] + "-map" + dateString,
       "fill-extrusion-opacity",
       0
     );
@@ -352,7 +487,7 @@ function getCamera() {
 }
 
 function returnCamera() {
-  var activeLayer = checkboxVals("emotion")[0];
+  var activeLayer = checkboxVals();
 
   activeCamera = "hexbin";
   // exception: only for inspector > hexbin case
@@ -374,33 +509,102 @@ function returnCamera() {
   $("#back").hide();
 }
 
+function hideAllLayers() {
+  gridActive.features = [];
+  map.getSource("grid-active").setData(gridActive);
+
+  for (let l of layers) {
+    l += dateString;
+    var c = map.getLayer(l);
+
+    // Check if layer exists
+    if (typeof c !== "undefined") {
+      // Remove Date layers (only using one at a time)
+      if (dateString == "Date") {
+        map.removeLayer(l);
+        continue;
+      }
+
+      // Set any visible layers to be invisible
+      var m = map.getLayoutProperty(l, "visibility");
+      if (m === "visible") {
+        map.setLayoutProperty(l, "visibility", "none");
+      }
+    }
+  }
+}
+
+function refreshPopupFocus() {
+  for (let emo of emotions) {
+    // Center the map on the coordinates of any clicked point from the emotion point map
+    map.on("click", emo + "-point-map" + dateString, function(e) {
+      map.flyTo({ center: e.features[0].geometry.coordinates });
+    });
+
+    // Change the cursor to a pointer when the it enters the point layer
+    map.on("mouseenter", emo + "-point-map" + dateString, function() {
+      map.getCanvas().style.cursor = "pointer";
+    });
+
+    // Change it back to a pointer when it leaves.
+    map.on("mouseleave", emo + "-point-map" + dateString, function() {
+      map.getCanvas().style.cursor = "";
+    });
+  }
+}
+function removeSources() {
+  for (let e of emotions) {
+    var emoDate = e + "Date";
+    if (map.getSource(emoDate)) {
+      map.removeSource(emoDate);
+    }
+    for (let g of granularities) {
+      var emoGranDate = e + g + "-hexesDate";
+      if (map.getSource(emoGranDate)) {
+        map.removeSource(emoGranDate);
+      }
+    }
+  }
+}
+
 function showLayer() {
   // Make new emotions visible
-  var checked = checkboxVals("emotion");
+  var checked = checkboxVals();
   if (checked) {
     for (let e of checked) {
       var v = map.getLayoutProperty(
-        e + "-" + grans[gran.value] + "-map",
+        e + "-" + grans[gran.value] + "-map" + dateString,
         "visibility"
       );
       if (v === "none") {
         map.setLayoutProperty(
-          e + "-" + grans[gran.value] + "-map",
+          e + "-" + grans[gran.value] + "-map" + dateString,
           "visibility",
           "visible"
         );
         map.setLayoutProperty(
-          e + "-" + grans[gran.value] + "-count",
+          e + "-" + grans[gran.value] + "-count" + dateString,
           "visibility",
           "visible"
         );
-        map.setLayoutProperty(e + "-point-map", "visibility", "visible");
-        //map.setLayoutProperty("grid-active", "visibility", "none");
+        map.setLayoutProperty(
+          e + "-point-map" + dateString,
+          "visibility",
+          "visible"
+        );
       }
       var diffGrans = findDiff(Object.values(grans), [grans[gran.value]]);
       for (let g of diffGrans) {
-        map.setLayoutProperty(e + "-" + g + "-map", "visibility", "none");
-        map.setLayoutProperty(e + "-" + g + "-count", "visibility", "none");
+        map.setLayoutProperty(
+          e + "-" + g + "-map" + dateString,
+          "visibility",
+          "none"
+        );
+        map.setLayoutProperty(
+          e + "-" + g + "-count" + dateString,
+          "visibility",
+          "none"
+        );
       }
     }
     gridActive.features = [];
@@ -418,36 +622,27 @@ function showLayer() {
   if (unchecked) {
     for (let e of unchecked) {
       var v = map.getLayoutProperty(
-        e + "-" + grans[gran.value] + "-map",
+        e + "-" + grans[gran.value] + "-map" + dateString,
         "visibility"
       );
       if (v === "visible") {
         map.setLayoutProperty(
-          e + "-" + grans[gran.value] + "-count",
+          e + "-" + grans[gran.value] + "-count" + dateString,
           "visibility",
           "none"
         );
         map.setLayoutProperty(
-          e + "-" + grans[gran.value] + "-map",
+          e + "-" + grans[gran.value] + "-map" + dateString,
           "visibility",
           "none"
         );
-        map.setLayoutProperty(e + "-point-map", "visibility", "none");
+        map.setLayoutProperty(
+          e + "-point-map" + dateString,
+          "visibility",
+          "none"
+        );
       }
     }
-  }
-}
-
-function filterDate() {
-  var activeLayer = checkboxVals("emotion")[0];
-  var activeGran = grans[gran.value];
-  var features = map.queryRenderedFeatures({
-    layers: [activeLayer + "-" + activeGran + "-map"]
-  });
-
-  if (features) {
-    // Add a filter function to the active layer
-    // map.setFilter(activeLayer + "-" + activeGran + "-map", )
   }
 }
 
@@ -455,8 +650,6 @@ document.getElementById("back").onclick = returnCamera;
 gran.onchange = showLayer;
 
 map.on("load", function() {
-  var granularities = ["zero_five_km", "one_km", "one_five_km"];
-
   map.addControl(
     new mapboxgl.NavigationControl({
       position: "top-right"
@@ -515,18 +708,20 @@ map.on("load", function() {
     }
   });
 
-  var activeLayer = checkboxVals("emotion")[0];
+  var activeLayer = checkboxVals();
 
   map.on("mousemove", function(e) {
-    var currEmo = checkboxVals("emotion");
+    var currEmo = checkboxVals();
     if (currEmo.length == 1) {
       if (activeCamera == "hexbin") {
         var query = map.queryRenderedFeatures(e.point, {
-          layers: [currEmo[0] + "-" + grans[gran.value] + "-map"]
+          layers: [currEmo[0] + "-" + grans[gran.value] + "-map" + dateString]
         });
         if (query.length) {
           gridActive.features = [query[0]];
           var numTweets = query[0].properties[numTweets];
+        } else {
+          gridActive.features = [];
         }
         map.getSource("grid-active").setData(gridActive);
       }
@@ -535,10 +730,10 @@ map.on("load", function() {
 
   map.on("click", function(e) {
     if (activeCamera === "hexbin") {
-      var currEmo = checkboxVals("emotion");
+      var currEmo = checkboxVals();
       if (currEmo.length == 1) {
         var query = map.queryRenderedFeatures(e.point, {
-          layers: [currEmo[0] + "-" + grans[gran.value] + "-map"]
+          layers: [currEmo[0] + "-" + grans[gran.value] + "-map" + dateString]
         });
         // it's the same hexbin as the current highlight
         if (
@@ -568,26 +763,30 @@ map.on("load", function() {
     }
   });
   // Only show hexes/points for selected emotion on initial load
-  var checked = checkboxVals("emotion");
+  var checked = checkboxVals();
 
   if (checked) {
     for (let e of checked) {
       var v = map.getLayoutProperty(
-        e + "-" + grans[gran.value] + "-map",
+        e + "-" + grans[gran.value] + "-map" + dateString,
         "visibility"
       );
       if (v === "none") {
-        var v = map.setLayoutProperty(
-          e + "-" + grans[gran.value] + "-map",
+        map.setLayoutProperty(
+          e + "-" + grans[gran.value] + "-map" + dateString,
           "visibility",
           "visible"
         );
-        var v = map.setLayoutProperty(
-          e + "-" + grans[gran.value] + "-count",
+        map.setLayoutProperty(
+          e + "-" + grans[gran.value] + "-count" + dateString,
           "visibility",
           "visible"
         );
-        map.setLayoutProperty(e + "-point-map", "visibility", "visible");
+        map.setLayoutProperty(
+          e + "-point-map" + dateString,
+          "visibility",
+          "visible"
+        );
       }
     }
   }
@@ -598,21 +797,5 @@ map.on("load", function() {
   for (var i = 0; i < inputs.length; i++) {
     inputs[i].addEventListener("click", showLayer);
   }
-
-  for (let emo of emotions) {
-    // Center the map on the coordinates of any clicked point from the emotion point map
-    map.on("click", emo + "-point-map", function(e) {
-      map.flyTo({ center: e.features[0].geometry.coordinates });
-    });
-
-    // Change the cursor to a pointer when the it enters the point layer
-    map.on("mouseenter", emo + "-point-map", function() {
-      map.getCanvas().style.cursor = "pointer";
-    });
-
-    // Change it back to a pointer when it leaves.
-    map.on("mouseleave", emo + "-point-map", function() {
-      map.getCanvas().style.cursor = "";
-    });
-  }
+  refreshPopupFocus();
 });
