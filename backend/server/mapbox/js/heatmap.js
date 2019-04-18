@@ -439,7 +439,9 @@ function addEmoLayer(emo, gran) {
           emoVal +
           " | <b>Date: </b> " +
           d.toString().slice(0, -13) +
-          "<p></div>"
+          " | <b>User: </b>@" +
+          feature.properties.name +
+          "</p></div>"
       )
       .setLngLat(feature.geometry.coordinates)
       .addTo(map);
